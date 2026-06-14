@@ -28,7 +28,7 @@ trait Derivation:
     case gm: Made.SingletonOf[T] => deriveSingleton[T](gm)
 
   inline def deriveProduct[T](m: Made.ProductOf[T]): MCodec[T] = mkProductCodec[T](
-    compiletime.constValueTuple[m.ElemLabels].toArrayOf[String](using containsOnly.refl),
+    compiletime.constValueTuple[m.ElemLabels].toArrayOf[String],
     compiletime.summonAll[Tuple.Map[m.ElemTypes, MCodec]].toArrayOf[MCodec[Any]](using containsOnly.refl),
     m.fromUnsafeArray,
   )
@@ -65,7 +65,7 @@ trait Derivation:
 
   inline def deriveSum[T](m: Made.SumOf[T]): MCodec[T] = mkNestedSumCodec[T](
     compiletime.constValue[m.Label],
-    compiletime.constValueTuple[m.ElemLabels].toArrayOf[String](using containsOnly.refl),
+    compiletime.constValueTuple[m.ElemLabels].toArrayOf[String],
     summonOrDeriveCases[m.ElemTypes].toArray,
     m.ordinal,
   )
