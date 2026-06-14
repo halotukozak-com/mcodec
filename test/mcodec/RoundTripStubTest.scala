@@ -1,5 +1,10 @@
 package mcodec
 
 class RoundTripStubTest extends RoundTrip:
-  given MCodec[Int] = MCodec.stub[Int](_.toString, _.toInt)
+  def backend = InMemoryBackend
+
+  given MCodec[Int] = new SimpleCodec[Int]:
+    def readSimple(in: SimpleInput): Int = in.readInt()
+    def writeSimple(out: SimpleOutput, v: Int): Unit = out.writeInt(v)
+
   roundTrip[Int]("Int")
