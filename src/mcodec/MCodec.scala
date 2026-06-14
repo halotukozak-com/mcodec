@@ -1,11 +1,26 @@
 package mcodec
 
-// Phase-1 stub; real streaming contract arrives in Phase 2.
 trait MCodec[T]:
-  def encode(value: T): String
-  def decode(repr: String): T
+  def read(input: Input): T
+
+  def write(output: Output, value: T): Unit
+
+  final inline def transform[U](inline onWrite: U => T, inline onRead: T => U): MCodec[U] =
+    MCodec.create(in => onRead(read(in)), (out, u) => write(out, onWrite(u)))
 
 object MCodec:
-  def stub[T](enc: T => String, dec: String => T): MCodec[T] = new MCodec[T]:
-    def encode(value: T): String = enc(value)
-    def decode(repr: String): T  = dec(repr)
+  inline def apply[T](using c: MCodec[T]): MCodec[T] = c
+
+  def create[T](readFun: Input => T, writeFun: (Output, T) => Unit): MCodec[T] = new MCodec[T]:
+    def read(input: Input): T = readFun(input)
+
+    def write(output: Output, value: T): Unit = writeFun(output, value)
+
+  def makeLazy[T](codec: => MCodec[T]): MCodec[T] = new MCodec[T]:
+    private lazy val c = codec
+
+    def read(input: Input): T = c.read(input)
+
+    def write(output: Output, value: T): Unit = c.write(output, value)
+
+// Phase 4 adds: inline def derived[T](using Made.Of[T]): MCodec[T]
