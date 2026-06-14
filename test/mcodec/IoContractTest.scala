@@ -20,9 +20,9 @@ class IoContractTest extends munit.FunSuite:
     def readObject(i: ObjectInput): Pair =
       Pair(intCodec.read(i.getNextNamedField("a")), stringCodec.read(i.getNextNamedField("b")))
 
-  private def harvest[T](v: T)(using c: MCodec[T]): MValue =
+  private def harvest[T: MCodec as codec](v: T): MValue =
     val (out, get) = InMemoryBackend.output()
-    c.write(out, v)
+    codec.write(out, v)
     get()
 
   // CORE-01: Output writes null / simple / list / object

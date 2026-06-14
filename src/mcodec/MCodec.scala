@@ -5,9 +5,10 @@ trait MCodec[T]:
 
   def write(output: Output, value: T): Unit
 
-  final inline def transform[U](inline onWrite: U => T, inline onRead: T => U): MCodec[U] =
+  inline final def transform[U](inline onWrite: U => T, inline onRead: T => U): MCodec[U] =
     MCodec.create(in => onRead(read(in)), (out, u) => write(out, onWrite(u)))
 
+object MCodec extends StdCodecs:
   inline def apply[T: MCodec as c]: MCodec[T] = c
 
   def create[T](readFun: Input => T, writeFun: (Output, T) => Unit): MCodec[T] = new:
