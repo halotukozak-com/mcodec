@@ -7,6 +7,7 @@
 
 //> using options -deprecation -feature -new-syntax -unchecked
 //> using options -language:noAutoTupling
+//> using options -Yexplicit-nulls
 // //> using options -Wsafe-init -Werror -Wunused:all
 
 //> using publish.organization io.github.halotukozak
