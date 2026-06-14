@@ -2,7 +2,7 @@
 
 //> using dep io.github.halotukozak::made:0.1.1
 
-//> using test.dep org.scalameta::munit:1.3.0
+//> using test.dep org.scalameta::munit:1.3.3
 //> using test.dep org.scalameta::munit-scalacheck:1.3.0
 
 //> using options -deprecation -feature -new-syntax -unchecked
