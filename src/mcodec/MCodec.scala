@@ -11,6 +11,9 @@ trait MCodec[T]:
 object MCodec extends StdCodecs:
   inline def apply[T: MCodec as c]: MCodec[T] = c
 
+  def read[T: MCodec as codec](input: Input): T = codec.read(input)
+  def write[T: MCodec as codec](output: Output, value: T): Unit = codec.write(output, value)
+
   def create[T](readFun: Input => T, writeFun: (Output, T) => Unit): MCodec[T] = new:
     def read(input: Input): T = readFun(input)
     def write(output: Output, value: T): Unit = writeFun(output, value)

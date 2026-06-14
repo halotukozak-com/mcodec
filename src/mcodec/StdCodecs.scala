@@ -40,23 +40,23 @@ trait StdCodecs:
       catch case e: IllegalArgumentException => throw ReadFailure("invalid UUID", e)
     def writeSimple(out: SimpleOutput, v: ju.UUID): Unit = out.writeString(v.toString)
 
-  given optionCodec: [T: MCodec as elem] => MCodec[Option[T]] = new:
+  given optionCodec: [T: MCodec] => MCodec[Option[T]] = new:
     def write(out: Output, value: Option[T]): Unit = value match
-      case Some(x) => elem.write(out, x)
+      case Some(x) => MCodec.write(out, x)
       case None => out.writeNull()
     def read(in: Input): Option[T] =
-      if in.readNull() then None else Some(elem.read(in))
+      if in.readNull() then None else Some(MCodec.read[T](in))
 
-  given eitherCodec: [L: MCodec as lc, R: MCodec as rc] => ObjectCodec[Either[L, R]] = new:
+  given eitherCodec: [L: MCodec, R: MCodec] => ObjectCodec[Either[L, R]] = new:
     def writeObject(out: ObjectOutput, v: Either[L, R]): Unit = v match
-      case Left(l) => lc.write(out.writeField("Left"), l)
-      case Right(r) => rc.write(out.writeField("Right"), r)
+      case Left(l) => MCodec.write(out.writeField("Left"), l)
+      case Right(r) => MCodec.write(out.writeField("Right"), r)
     def readObject(in: ObjectInput): Either[L, R] =
       if !in.hasNext then throw ReadFailure("expected Left/Right field, got empty object")
       val f = in.nextField()
       f.fieldName match
-        case "Left" => Left(lc.read(f))
-        case "Right" => Right(rc.read(f))
+        case "Left" => Left(MCodec.read[L](f))
+        case "Right" => Right(MCodec.read[R](f))
         case other => throw ReadFailure(s"expected Left/Right, got field: $other")
 
   inline given tupleCodec: [T <: Tuple] => ListCodec[T] =
@@ -73,12 +73,12 @@ trait StdCodecs:
         c.read(in.nextElement())
       Tuple.fromArray(elems.toArray[Any]).asInstanceOf[T]
 
-  private def collCodec[C[X] <: Iterable[X], T: MCodec as elem](using fac: Factory[T, C[T]]): ListCodec[C[T]] = new:
+  private def collCodec[C[X] <: Iterable[X], T: MCodec](using fac: Factory[T, C[T]]): ListCodec[C[T]] = new:
     def writeList(out: ListOutput, value: C[T]): Unit =
-      value.foreach(elem.write(out.writeElement(), _))
+      value.foreach(MCodec.write(out.writeElement(), _))
     def readList(in: ListInput): C[T] =
       val b = fac.newBuilder
-      while in.hasNext do b += elem.read(in.nextElement())
+      while in.hasNext do b += MCodec.read[T](in.nextElement())
       b.result()
 
   given seqCodec: [C[X] <: collection.Seq[X], T: MCodec] => Factory[T, C[T]] => ListCodec[C[T]] = collCodec[C, T]
@@ -88,46 +88,46 @@ trait StdCodecs:
   given indexedSeqCodec: [T: MCodec] => ListCodec[IndexedSeq[T]] = collCodec[IndexedSeq, T]
   given hashSetCodec: [T: MCodec] => ListCodec[HashSet[T]] = collCodec[HashSet, T]
 
-  given arrayCodec: [T: {ClassTag, MCodec as elem}] => ListCodec[Array[T]] = new:
+  given arrayCodec: [T: {ClassTag, MCodec}] => ListCodec[Array[T]] = new:
     def writeList(out: ListOutput, value: Array[T]): Unit =
       var i = 0
       while i < value.length do
-        elem.write(out.writeElement(), value(i))
+        MCodec.write(out.writeElement(), value(i))
         i += 1
     def readList(in: ListInput): Array[T] =
       val b = Array.newBuilder[T]
-      while in.hasNext do b += elem.read(in.nextElement())
+      while in.hasNext do b += MCodec.read[T](in.nextElement())
       b.result()
 
-  protected def objectMapCodec[K: MKeyCodec as keyCodec, V: MCodec as valueCodec]: ObjectCodec[Map[K, V]] = new:
+  protected def objectMapCodec[K: MKeyCodec as keyCodec, V: MCodec]: ObjectCodec[Map[K, V]] = new:
     def writeObject(out: ObjectOutput, m: Map[K, V]): Unit = m.foreach: (key, value) =>
-      valueCodec.write(out.writeField(keyCodec.writeKey(key)), value)
+      MCodec.write(out.writeField(keyCodec.writeKey(key)), value)
     def readObject(in: ObjectInput): Map[K, V] =
       val b = Map.newBuilder[K, V]
       while in.hasNext do
         val f = in.nextField()
-        b += keyCodec.readKey(f.fieldName) -> valueCodec.read(f)
+        b += keyCodec.readKey(f.fieldName) -> MCodec.read[V](f)
       b.result()
 
-  protected def pairsMapCodec[K: MCodec as keyCodec, V: MCodec as valueCodec]: ListCodec[Map[K, V]] = new:
+  protected def pairsMapCodec[K: MCodec, V: MCodec]: ListCodec[Map[K, V]] = new:
     def writeList(out: ListOutput, m: Map[K, V]): Unit = m.foreach: (key, value) =>
       val pair = out.writeElement().writeList()
-      keyCodec.write(pair.writeElement(), key)
-      valueCodec.write(pair.writeElement(), value)
+      MCodec.write(pair.writeElement(), key)
+      MCodec.write(pair.writeElement(), value)
       pair.finish()
     def readList(in: ListInput): Map[K, V] =
       val b = Map.newBuilder[K, V]
       while in.hasNext do
         val pair = in.nextElement().readList()
         if !pair.hasNext then throw ReadFailure("expected map entry key")
-        val key = keyCodec.read(pair.nextElement())
+        val key = MCodec.read[K](pair.nextElement())
         if !pair.hasNext then throw ReadFailure("expected map entry value")
-        val value = valueCodec.read(pair.nextElement())
+        val value = MCodec.read[V](pair.nextElement())
         pair.skipRemaining()
         b += key -> value
       b.result()
 
-  inline given mapCodec: [K: MCodec as k, V: MCodec as v] => MCodec[Map[K, V]] =
+  inline given mapCodec: [K: MCodec, V: MCodec] => MCodec[Map[K, V]] =
     scala.compiletime.summonFrom:
       case given MKeyCodec[K] => objectMapCodec
       case _ => pairsMapCodec
