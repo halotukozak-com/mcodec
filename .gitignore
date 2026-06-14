@@ -1,0 +1,7 @@
+
+# GSD planning docs (local-only)
+.planning/
+
+# scala-cli build artifacts
+.scala-build/
+.bsp/
