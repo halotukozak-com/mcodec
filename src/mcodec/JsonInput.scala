@@ -166,6 +166,10 @@ class JsonInput(reader: JsonReader) extends InputAndSimpleInput:
 
   def readDouble(): Double = reader.readRawNumber().toDouble
 
+  override def readFloat(): Float =
+    if reader.peekToken == JsonToken.Str then reader.readRawString().toFloat
+    else reader.readRawNumber().toFloat
+
   def readBigInt(): BigInt = BigInt(stripWholeFraction(reader.readRawNumber()))
 
   def readBigDecimal(): BigDecimal = BigDecimal(reader.readRawNumber())

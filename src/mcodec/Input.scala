@@ -18,6 +18,29 @@ trait SimpleInput:
   def readBigInt(): BigInt
   def readBigDecimal(): BigDecimal
 
+  def readByte(): Byte =
+    val i = readInt()
+    if i >= Byte.MinValue && i <= Byte.MaxValue then i.toByte
+    else throw ReadFailure(s"Int out of Byte range: $i")
+
+  def readShort(): Short =
+    val i = readInt()
+    if i >= Short.MinValue && i <= Short.MaxValue then i.toShort
+    else throw ReadFailure(s"Int out of Short range: $i")
+
+  def readChar(): Char =
+    val s = readString()
+    if s.length == 1 then s.charAt(0)
+    else throw ReadFailure(s"expected single-char string, got length ${s.length}")
+
+  def readFloat(): Float = readDouble().toFloat
+
+  def readTimestamp(): Long = readLong()
+
+  def readBinary(): Array[Byte] =
+    // PLATFORM-SEAM: java.util.Base64 (JVM-only; replace behind a platform seam in cross-build Phase F)
+    java.util.Base64.getDecoder.nn.decode(readString()).nn
+
 trait SequentialInput:
   def hasNext: Boolean
   def skipRemaining(): Unit

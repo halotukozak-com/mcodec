@@ -15,6 +15,20 @@ trait SimpleOutput:
   def writeBigInt(b: BigInt): Unit
   def writeBigDecimal(b: BigDecimal): Unit
 
+  def writeByte(b: Byte): Unit = writeInt(b.toInt)
+
+  def writeShort(s: Short): Unit = writeInt(s.toInt)
+
+  def writeChar(c: Char): Unit = writeString(c.toString)
+
+  def writeFloat(f: Float): Unit = writeDouble(f.toDouble)
+
+  def writeTimestamp(millis: Long): Unit = writeLong(millis)
+
+  def writeBinary(bytes: Array[Byte]): Unit =
+    // PLATFORM-SEAM: java.util.Base64 (JVM-only; replace behind a platform seam in cross-build Phase F)
+    writeString(java.util.Base64.getEncoder.nn.encodeToString(bytes).nn)
+
 trait SequentialOutput:
   def finish(): Unit
   def declareSize(size: Int): Unit = ()
