@@ -1,15 +1,10 @@
 package mcodec
 
-class AdtWireShapeTest extends munit.FunSuite:
+class AdtWireShapeTest extends munit.FunSuite, JsonConv:
   enum Shape derives MCodec:
     case Circle(radius: Double)
     case Rectangle(w: Double, h: Double)
     case Point
-
-  private def toJson[T: MCodec as codec](x: T): String =
-    val (out, harvest) = JsonBackend.output()
-    codec.write(out, x)
-    harvest()
 
   test("Circle nested-discriminator wire shape"):
     assertEquals(toJson[Shape](Shape.Circle(2.0)), "{\"Circle\":{\"radius\":2.0}}")

@@ -6,7 +6,7 @@ import org.scalacheck.{Arbitrary, Gen}
 
 import MValue.*
 
-class StdCodecsTest extends RoundTrip:
+class StdCodecsTest extends RoundTrip, JsonConv:
   def backend: Backend = InMemoryBackend
 
   given Arbitrary[java.util.UUID] = Arbitrary(Gen.uuid)
@@ -92,3 +92,7 @@ class StdCodecsTest extends RoundTrip:
     intercept[ReadFailure] {
       MCodec[java.util.UUID].read(new InMemoryInput(MString("not-a-uuid")))
     }
+
+  test("MANUAL-05 Map[Int, String] round-trips through JSON with string keys"):
+    assertEquals(toJson(Map(1 -> "a")), "{\"1\":\"a\"}")
+    assertEquals(fromJson[Map[Int, String]]("{\"1\":\"a\"}"), Map(1 -> "a"))

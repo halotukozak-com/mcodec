@@ -2,16 +2,11 @@ package mcodec
 
 import made.annotation.name
 
-class NameAnnotTest extends munit.FunSuite:
+class NameAnnotTest extends munit.FunSuite, JsonConv:
   case class User(@name("user_name") name: String, age: Int) derives MCodec
 
   enum Shape derives MCodec:
     @name("circ") case Circle(radius: Double)
-
-  private def toJson[T: MCodec as codec](x: T): String =
-    val (out, harvest) = JsonBackend.output()
-    codec.write(out, x)
-    harvest()
 
   test("@name overrides a field label on the wire"):
     assertEquals(toJson(User("bob", 30)), "{\"user_name\":\"bob\",\"age\":30}")

@@ -2,13 +2,7 @@ package mcodec
 
 import mcodec.MKeyCodec.given
 
-class JsonFormatTest extends munit.FunSuite:
-  def toJson[T: MCodec as codec](x: T): String =
-    val (out, harvest) = JsonBackend.output()
-    codec.write(out, x)
-    harvest()
-
-  def fromJson[T: MCodec as codec](s: String): T = codec.read(JsonBackend.input(s))
+class JsonFormatTest extends munit.FunSuite, JsonConv:
 
   test("Either encodes to tagged single-field object"):
     assertEquals(toJson(Left(5): Either[Int, String]), "{\"Left\":5}")

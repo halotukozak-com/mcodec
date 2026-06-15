@@ -2,13 +2,8 @@ package mcodec
 
 import made.annotation.transparent
 
-class TransparentAnnotTest extends munit.FunSuite:
+class TransparentAnnotTest extends munit.FunSuite, JsonConv:
   @transparent case class Email(value: String) derives MCodec
-
-  private def toJson[T: MCodec as codec](x: T): String =
-    val (out, harvest) = JsonBackend.output()
-    codec.write(out, x)
-    harvest()
 
   test("@transparent serializes as the bare wrapped value (no envelope)"):
     assertEquals(toJson(Email("a@b.com")), "\"a@b.com\"")
