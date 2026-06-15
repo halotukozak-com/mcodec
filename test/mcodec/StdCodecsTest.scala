@@ -1,14 +1,10 @@
 package mcodec
 
 import mcodec.MKeyCodec.given
-
+import mcodec.MValue.*
 import org.scalacheck.{Arbitrary, Gen}
 
-import MValue.*
-
-class StdCodecsTest extends RoundTrip, JsonConv:
-  def backend: Backend = InMemoryBackend
-
+class StdCodecsTest extends RoundTrip(InMemoryBackend), JsonConv:
   given Arbitrary[java.util.UUID] = Arbitrary(Gen.uuid)
   given Arbitrary[Double] = Arbitrary(Arbitrary.arbitrary[Double].suchThat(d => java.lang.Double.isFinite(d)))
 

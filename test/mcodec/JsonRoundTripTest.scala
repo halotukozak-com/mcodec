@@ -3,8 +3,7 @@ package mcodec
 import mcodec.MKeyCodec.given
 import org.scalacheck.{Arbitrary, Gen}
 
-class JsonRoundTripTest extends RoundTrip:
-  def backend: Backend = JsonBackend
+class JsonRoundTripTest extends RoundTrip(JsonBackend):
 
   given Arbitrary[java.util.UUID] = Arbitrary(Gen.uuid)
 

@@ -1,7 +1,6 @@
 package mcodec
 
-class RoundTripStubTest extends RoundTrip:
-  def backend = InMemoryBackend
+class RoundTripStubTest extends RoundTrip(InMemoryBackend):
 
   given MCodec[Int] = new SimpleCodec[Int]:
     def readSimple(in: SimpleInput): Int = in.readInt()

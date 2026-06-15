@@ -2,8 +2,7 @@ package mcodec
 
 import org.scalacheck.{Arbitrary, Gen}
 
-class AdtDerivationTest extends RoundTrip:
-  def backend = JsonBackend
+class AdtDerivationTest extends RoundTrip(JsonBackend):
 
   enum Shape derives MCodec:
     case Circle(radius: Double)
