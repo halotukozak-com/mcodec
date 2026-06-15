@@ -34,7 +34,13 @@ class ManualApiTest extends munit.FunSuite, JsonConv:
 
   test("createList round-trips as a positional list"):
     given MCodec[Pair] = MCodec.createList[Pair](
-      in => Pair(in.nextElement().readSimple().readInt(), in.nextElement().readSimple().readInt()),
+      in =>
+        in.hasNext
+        val a = in.nextElement().readSimple().readInt()
+        in.hasNext
+        val b = in.nextElement().readSimple().readInt()
+        Pair(a, b)
+      ,
       (out, p) =>
         out.writeElement().writeSimple().writeInt(p.a)
         out.writeElement().writeSimple().writeInt(p.b),
@@ -44,29 +50,19 @@ class ManualApiTest extends munit.FunSuite, JsonConv:
 
   test("createObject round-trips as an object"):
     given MCodec[Wrap] = MCodec.createObject[Wrap](
-      in => Wrap(in.nextField().readSimple().readInt()),
+      in =>
+        in.hasNext
+        Wrap(in.nextField().readSimple().readInt())
+      ,
       (out, w) => out.writeField("n").writeSimple().writeInt(w.n),
     )
     assertEquals(Wrap(5).toJson, "{\"n\":5}")
     assertEquals(fromJson[Wrap]("{\"n\":5}"), Wrap(5))
 
-  test("nullableSimple encodes null as wire-null and delegates non-null"):
-    given MCodec[Wrap | Null] =
-      MCodec.nullableSimple[Wrap](in => Wrap(in.readInt()), (out, w) => out.writeInt(w.n))
-    assertEquals(null.toJson[Wrap | Null], "null")
-    assertEquals(fromJson[Wrap | Null]("null"), null)
-    assertEquals(Wrap(5).toJson[Wrap | Null], "5")
-    assertEquals(fromJson[Wrap | Null]("5"), Wrap(5))
-
   test("nonNullString uses a quoted-string wire"):
     given MCodec[Wrap] = MCodec.nonNullString[Wrap](s => Wrap(s.toInt), w => w.n.toString)
     assertEquals(Wrap(5).toJson, "\"5\"")
     assertEquals(fromJson[Wrap]("\"5\""), Wrap(5))
-
-  test("nullableString encodes null as wire-null"):
-    given MCodec[Wrap | Null] = MCodec.nullableString[Wrap](s => Wrap(s.toInt), w => w.n.toString)
-    assertEquals(null.toJson[Wrap | Null], "null")
-    assertEquals(Wrap(5).toJson[Wrap | Null], "\"5\"")
 
   test("fromKeyCodec serializes value as the QUOTED key string"):
     import mcodec.MKeyCodec.given

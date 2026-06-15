@@ -28,7 +28,7 @@ trait MCodec[T]:
       case null => output.writeNull()
       case v => self.write(output, v)
 
-object MCodec extends StdCodecs, Derivation:
+object MCodec extends StdCodecs, ManualCodecs, JavaCodecs, Derivation:
   inline def apply[T: MCodec as c]: MCodec[T] = c
 
   transparent inline def derived[T](using m: Made.Of[T]): MCodec[T] = derivedRec[T]
