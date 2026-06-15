@@ -3,12 +3,30 @@ package mcodec
 import made.*
 
 trait MCodec[T]:
+  self =>
+
   def read(input: Input): T
 
   def write(output: Output, value: T): Unit
 
   inline final def transform[U](inline onWrite: U => T, inline onRead: T => U): MCodec[U] =
     MCodec.create(in => onRead(read(in)), (out, u) => write(out, onWrite(u)))
+
+  final def transformed[U](onRead: T => U)(onWrite: U => T): MCodec[U] = new:
+    def read(input: Input): U =
+      try onRead(self.read(input))
+      catch case scala.util.control.NonFatal(e) => throw ReadFailure("onRead conversion failed", e)
+    def write(output: Output, value: U): Unit =
+      val t = try onWrite(value)
+      catch case scala.util.control.NonFatal(e) => throw WriteFailure("onWrite conversion failed", e)
+      self.write(output, t)
+
+  final def nullable: MCodec[T | Null] = new:
+    def read(input: Input): T | Null =
+      if input.readNull() then null else self.read(input)
+    def write(output: Output, value: T | Null): Unit = value match
+      case null => output.writeNull()
+      case v => self.write(output, v)
 
 object MCodec extends StdCodecs, Derivation:
   inline def apply[T: MCodec as c]: MCodec[T] = c
