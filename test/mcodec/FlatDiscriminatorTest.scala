@@ -34,16 +34,16 @@ class FlatDiscriminatorTest extends RoundTrip(JsonBackend):
 
 class FlatWireShapeTest extends munit.FunSuite, JsonConv:
   test("Circle flat-discriminator wire shape"):
-    assertEquals((FlatShape.Circle(2.0): FlatShape).toJson, "{\"_case\":\"Circle\",\"radius\":2.0}")
+    assertEquals(FlatShape.Circle(2.0).toJson[FlatShape], "{\"_case\":\"Circle\",\"radius\":2.0}")
 
   test("Rectangle flat-discriminator wire shape"):
-    assertEquals((FlatShape.Rectangle(1.0, 2.0): FlatShape).toJson, "{\"_case\":\"Rectangle\",\"w\":1.0,\"h\":2.0}")
+    assertEquals(FlatShape.Rectangle(1.0, 2.0).toJson[FlatShape], "{\"_case\":\"Rectangle\",\"w\":1.0,\"h\":2.0}")
 
   test("singleton case -> discriminator only"):
-    assertEquals((FlatShape.Point: FlatShape).toJson, "{\"_case\":\"Point\"}")
+    assertEquals(FlatShape.Point.toJson[FlatShape], "{\"_case\":\"Point\"}")
 
   test("@flatten(\"type\") overrides the discriminator key"):
-    assertEquals((TypedShape.Square(3.0): TypedShape).toJson, "{\"type\":\"Square\",\"side\":3.0}")
+    assertEquals(TypedShape.Square(3.0).toJson[TypedShape], "{\"type\":\"Square\",\"side\":3.0}")
 
   test("non-leading discriminator reads correctly"):
     assertEquals(

@@ -4,10 +4,10 @@ class NullableTest extends munit.FunSuite, JsonConv:
   given MCodec[String | Null] = MCodec[String].nullable
 
   test("nullable writes explicit wire-null for null"):
-    assertEquals((null: String | Null).toJson, "null")
+    assertEquals(null.toJson[String | Null], "null")
 
   test("nullable delegates write for non-null"):
-    assertEquals(("x": String | Null).toJson, "\"x\"")
+    assertEquals("x".toJson[String | Null], "\"x\"")
 
   test("nullable reads wire-null as null"):
     assertEquals(fromJson[String | Null]("null"), null)

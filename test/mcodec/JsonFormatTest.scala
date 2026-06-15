@@ -5,8 +5,8 @@ import mcodec.MKeyCodec.given
 class JsonFormatTest extends munit.FunSuite, JsonConv:
 
   test("Either encodes to tagged single-field object"):
-    assertEquals((Left(5): Either[Int, String]).toJson, "{\"Left\":5}")
-    assertEquals((Right("x"): Either[Int, String]).toJson, "{\"Right\":\"x\"}")
+    assertEquals(Left(5).toJson[Either[Int, String]], "{\"Left\":5}")
+    assertEquals(Right("x").toJson[Either[Int, String]], "{\"Right\":\"x\"}")
     assertEquals(fromJson[Either[Int, String]]("{\"Left\":5}"), Left(5))
     assertEquals(fromJson[Either[Int, String]]("{\"Right\":\"x\"}"), Right("x"))
 
@@ -21,8 +21,8 @@ class JsonFormatTest extends munit.FunSuite, JsonConv:
     assertEquals(fromJson[Map[List[Int], Int]](s), Map(List(1) -> 2))
 
   test("Option encodes to value or null"):
-    assertEquals((None: Option[Int]).toJson, "null")
-    assertEquals((Some(7): Option[Int]).toJson, "7")
+    assertEquals(None.toJson[Option[Int]], "null")
+    assertEquals(Some(7).toJson[Option[Int]], "7")
     assertEquals(fromJson[Option[Int]]("null"), None)
     assertEquals(fromJson[Option[Int]]("7"), Some(7))
 

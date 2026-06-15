@@ -1,6 +1,6 @@
 package mcodec
 
 trait JsonConv:
-  extension [T: MCodec](x: T) def toJson: String = Json.write(x)
+  extension (x: Any) def toJson[T >: x.type: MCodec]: String = Json.write[T](x)
 
   def fromJson[T: MCodec](s: String): T = Json.read(s)

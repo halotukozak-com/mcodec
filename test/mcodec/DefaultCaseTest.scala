@@ -25,10 +25,10 @@ class DefaultCaseTest extends munit.FunSuite, JsonConv:
     assertEquals(MCodec[FlatCmd].read(JsonBackend.input("{\"_case\":\"Nope\"}")), FlatCmd.Fallback)
 
   test("non-default nested case still round-trips"):
-    assertEquals(fromJson[NestedCmd]((NestedCmd.Start(5): NestedCmd).toJson), NestedCmd.Start(5))
+    assertEquals(fromJson[NestedCmd](NestedCmd.Start(5).toJson[NestedCmd]), NestedCmd.Start(5))
 
   test("non-default flat case still round-trips"):
-    assertEquals(fromJson[FlatCmd]((FlatCmd.Go(7): FlatCmd).toJson), FlatCmd.Go(7))
+    assertEquals(fromJson[FlatCmd](FlatCmd.Go(7).toJson[FlatCmd]), FlatCmd.Go(7))
 
   test("more than one @defaultCase is rejected at compile time"):
     val errs = typeCheckErrors("""
