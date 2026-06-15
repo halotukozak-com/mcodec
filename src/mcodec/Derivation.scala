@@ -32,8 +32,8 @@ trait Derivation:
     compiletime.constValueTuple[m.ElemLabels].toArrayOf[String],
     compiletime.summonAll[Tuple.Map[m.ElemTypes, MCodec]].toArrayOf[MCodec[Any]](using containsOnly.refl),
     m.elems
-      .mapAs[MadeFieldElem](using containsOnly.refl)[[e] =>> Option[Any]]([e <: MadeFieldElem] => elem => elem.default)
-      .toArrayOf[Option[Any]](using containsOnly.refl),
+      .mapAs[MadeFieldElem][[e] =>> Option[Any]]([e <: MadeFieldElem] => elem => elem.default)
+      .toArrayOf[Option[Any]],
     m.elems.hasAnnotations[optionalParam].toArrayOf[Boolean](using containsOnly.refl),
     isOptionFlags[m.ElemTypes].toArray,
     m.fromUnsafeArray,

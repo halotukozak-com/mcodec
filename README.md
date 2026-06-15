@@ -4,7 +4,7 @@ GenCodec-style serialization/deserialization for Scala 3, with derivation built 
 [Made](https://github.com/halotukozak/made). Format-agnostic streaming `Input`/`Output`
 core; JSON backend; JVM.
 
-> **Experimental.** Pinned to Scala **3.8.4-RC3** (a Scala Next RC), required by Made 0.1.1.
+> **Experimental.** Pinned to Scala **3.8.4** (Scala Next), required by Made (`made_3:0.1.2`).
 
 ## Build
 

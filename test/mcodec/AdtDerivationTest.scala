@@ -16,7 +16,10 @@ class AdtDerivationTest extends RoundTrip:
     Gen.oneOf(
       Gen.const(Shape.Point),
       finiteDouble.map(Shape.Circle(_)),
-      for w <- finiteDouble; h <- finiteDouble yield Shape.Rectangle(w, h),
+      for
+        w <- finiteDouble
+        h <- finiteDouble
+      yield Shape.Rectangle(w, h),
     ),
   )
 
