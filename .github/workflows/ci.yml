@@ -1,18 +1,43 @@
-name: CI
+name: Run CI
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
+    branches: [ main ]
 
 jobs:
-  build:
+  lint:
+    name: Scalafmt
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: coursier/cache-action@v6
-      - uses: VirtusLab/scala-cli-setup@v1.14.0
+      - uses: actions/checkout@v6
+      - name: Setup coursier cache
+        uses: coursier/cache-action@v8.1
+      - uses: VirtusLab/scala-cli-setup@v1
+      - name: Check formatting
+        run: scala-cli --power fmt --check .
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
         with:
-          scala-cli-version: 1.14.0
-      - run: scala-cli --power compile .
-      - run: scala-cli --power test .
+          fetch-depth: 0
+      - name: Setup coursier cache
+        uses: coursier/cache-action@v8.1
+      - uses: VirtusLab/scala-cli-setup@v1
+      - name: Run tests
+        # Coverage is recorded only for production sources; test sources are
+        # excluded so they don't inflate the reported number.
+        run: scala-cli --power test . -O -coverage-out:./.scoverage -O '-coverage-exclude-files:.*test/.*'
+      - name: Generate coverage
+        run: scala-cli .scoverage/report.sc
+      - uses: codecov/codecov-action@v7
+        with:
+          fail_ci_if_error: true
+          files: .scoverage/report/cobertura.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Test documentation
+        run: scala-cli --power doc .
