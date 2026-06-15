@@ -4,7 +4,7 @@ import munit.ScalaCheckSuite
 import org.scalacheck.Arbitrary
 import org.scalacheck.Prop.forAll
 
-open class RoundTrip(backend: => Backend) extends ScalaCheckSuite:
+abstract class RoundTrip(backend: => Backend) extends ScalaCheckSuite:
 
   def roundTrip[T: {Arbitrary, MCodec as codec}](name: String): Unit = property(s"round-trip: $name"):
     forAll: (x: T) =>
