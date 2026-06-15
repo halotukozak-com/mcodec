@@ -83,6 +83,66 @@ final class NestedSumCodec[T](
   catch case rf: ReadFailure => throw rf.withRootType(typeName)
 
 final class SingletonCodec[T](value: T) extends ObjectCodec[T]:
+final class FlatSumCodec[T](
+  typeName: String,
+  caseNames: Array[String],
+  caseCodecs: => Array[MCodec[Any]],
+  ordinalOf: T => Int,
+  caseFieldName: String,
+  defaultCaseIdx: Int,
+) extends ObjectCodec[T]:
+  if caseNames.distinct.length != caseNames.length then
+    throw ReadFailure(s"$typeName: duplicate case discriminator names: ${caseNames.mkString(", ")}")
+  private lazy val codecs = caseCodecs
+  // ADT-04 LIVE: the flat discriminator key must not collide with any case body field name.
+  private lazy val guardChecked =
+    var i = 0
+    while i < codecs.length do
+      val fields = bodyFieldNames(codecs(i))
+      if fields.contains(caseFieldName) then
+        throw ReadFailure(
+          s"$typeName: flat discriminator key '$caseFieldName' collides with field of case ${caseNames(i)}",
+        )
+      i += 1
+    true
+
+  private def bodyFieldNames(codec: MCodec[Any]): Array[String] = codec match
+    case p: ProductCodec[?] => p.bodyFieldNames
+    case s: SingletonCodec[?] => s.bodyFieldNames
+    case _ => Array.empty
+
+  def writeObject(out: ObjectOutput, value: T): Unit =
+    val idx = ordinalOf(value)
+    val _ = guardChecked
+    out.writeField(caseFieldName).writeSimple().writeString(caseNames(idx))
+    codecs(idx).asInstanceOf[ObjectCodec[Any]].writeObject(out, value)
+
+  def readObject(in: ObjectInput): T = try
+    val _ = guardChecked
+    val buf = Vector.newBuilder[(String, CapturedValue)]
+    var caseName: String | Null = null
+    while in.hasNext do
+      val f = in.nextField()
+      if f.fieldName == caseFieldName then caseName = f.readSimple().readString()
+      else buf += (f.fieldName -> CapturedValue.capture(f))
+    val idx = caseName match
+      case null => defaultCaseIdx
+      case cn =>
+        val i = caseNames.indexOf(cn)
+        if i < 0 then defaultCaseIdx else i
+    if idx < 0 then
+      throw ReadFailure(
+        caseName match
+          case null => s"$typeName: missing discriminator field '$caseFieldName'"
+          case cn => s"$typeName: unknown case $cn",
+      )
+    val replay = new ReplayObjectInput(buf.result())
+    withSegment(PathSegment.Case(caseNames(idx))):
+      codecs(idx).asInstanceOf[ObjectCodec[Any]].readObject(replay).asInstanceOf[T]
+  catch case rf: ReadFailure => throw rf.withRootType(typeName)
+
+final class SingletonCodec[T](val value: T) extends ObjectCodec[T]:
+  private[mcodec] def bodyFieldNames: Array[String] = Array.empty
   def writeObject(out: ObjectOutput, v: T): Unit = ()
   def readObject(in: ObjectInput): T = value
 

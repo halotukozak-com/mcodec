@@ -1,5 +1,8 @@
 package mcodec
 
+enum JsonToken:
+  case Obj, Arr, Str, Bool, Num
+
 final class JsonReader(s: String):
   private var i = 0
 
@@ -128,6 +131,18 @@ final class JsonReader(s: String):
     skipWs()
     if i < s.length then throw ReadFailure("trailing data after top-level value" + posSuffix(i))
 
+  // Peek the next significant token kind WITHOUT consuming (for snapshot capture only).
+  private[mcodec] def peekToken: JsonToken =
+    skipWs()
+    if i >= s.length then throw ReadFailure("unexpected end of input" + posSuffix(i))
+    s.charAt(i) match
+      case '{' => JsonToken.Obj
+      case '[' => JsonToken.Arr
+      case '"' => JsonToken.Str
+      case 't' | 'f' => JsonToken.Bool
+      case 'n' => JsonToken.Num
+      case _ => JsonToken.Num
+
   // package-private cursor helpers for list/object inputs
   private[mcodec] def consume(c: Char): Unit = expect(c)
 
@@ -160,6 +175,9 @@ class JsonInput(reader: JsonReader) extends InputAndSimpleInput:
   def readObject(): ObjectInput = new JsonObjectInput(reader)
 
   def skip(): Unit = reader.skipValue()
+
+  private[mcodec] def peekToken: JsonToken = reader.peekToken
+  private[mcodec] def rawNumber(): String = reader.readRawNumber()
 
   private def parseIntLexeme(lex: String): Int =
     try Integer.parseInt(lex)
