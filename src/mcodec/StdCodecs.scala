@@ -6,8 +6,6 @@ import scala.collection.immutable.HashSet
 import scala.reflect.ClassTag
 
 trait StdCodecs:
-  this: MCodec.type =>
-
   given intCodec: SimpleCodec[Int]:
     def readSimple(in: SimpleInput): Int = in.readInt()
     def writeSimple(out: SimpleOutput, v: Int): Unit = out.writeInt(v)
