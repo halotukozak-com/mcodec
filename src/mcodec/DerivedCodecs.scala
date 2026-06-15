@@ -19,11 +19,16 @@ final class ProductCodec[T](
   optionalFlags: Array[Boolean],
   isOption: Array[Boolean],
   fromArray: Array[Any] => T,
+  genLabels: Array[String],
+  genGetters: Array[T => Any],
+  genCodecsByName: => Array[MCodec[Any]],
 ) extends ObjectCodec[T]:
+  private[mcodec] def bodyFieldNames: Array[String] = labels
   private lazy val childCodecs = childCodecsByName
+  private lazy val genCodecs = genCodecsByName
   private val byName = labels.zipWithIndex.toMap
   def writeObject(out: ObjectOutput, value: T): Unit =
-    out.declareSize(labels.length)
+    out.declareSize(labels.length + genLabels.length)
     val p = value.asInstanceOf[Product]
     var i = 0
     while i < labels.length do
@@ -31,6 +36,10 @@ final class ProductCodec[T](
       if (optionalFlags(i) || isOption(i)) && (v == None) then ()
       else childCodecs(i).write(out.writeField(labels(i)), v)
       i += 1
+    var g = 0
+    while g < genLabels.length do
+      genCodecs(g).write(out.writeField(genLabels(g)), genGetters(g)(value))
+      g += 1
   def readObject(in: ObjectInput): T = try
     val values = new Array[Any](labels.length)
     val seen = new Array[Boolean](labels.length)
@@ -59,6 +68,7 @@ final class NestedSumCodec[T](
   caseNames: Array[String],
   caseCodecs: => Array[MCodec[Any]],
   ordinalOf: T => Int,
+  defaultCaseIdx: Int,
 ) extends ObjectCodec[T]:
   // ADT-04 flat-mode reuse hook: nested mode is structurally collision-free
   // (discriminator is the wrapper key), so this is vacuous now but guards Phase 7 flat mode.
@@ -70,19 +80,31 @@ final class NestedSumCodec[T](
     out.declareSize(1)
     codecs(idx).write(out.writeField(caseNames(idx)), value)
   def readObject(in: ObjectInput): T = try
-    if !in.hasNext then throw ReadFailure(s"$typeName: expected single-field case wrapper, got empty object")
-    val f = in.nextField()
-    val idx = caseNames.indexOf(f.fieldName)
-    if idx < 0 then throw ReadFailure(s"unknown case ${f.fieldName}")
-    val result =
-      withSegment(PathSegment.Case(f.fieldName)):
-        codecs(idx).read(f)
-      .asInstanceOf[T]
-    if in.hasNext then throw ReadFailure(s"$typeName: expected single-field case wrapper, got extra fields")
-    result
+    if !in.hasNext then
+      if defaultCaseIdx >= 0 then defaultRead()
+      else throw ReadFailure(s"$typeName: expected single-field case wrapper, got empty object")
+    else
+      val f = in.nextField()
+      val idx = caseNames.indexOf(f.fieldName)
+      if idx < 0 then
+        if defaultCaseIdx >= 0 then
+          f.skip()
+          defaultRead()
+        else throw ReadFailure(s"unknown case ${f.fieldName}")
+      else
+        val result =
+          withSegment(PathSegment.Case(f.fieldName)):
+            codecs(idx).read(f)
+          .asInstanceOf[T]
+        if in.hasNext then throw ReadFailure(s"$typeName: expected single-field case wrapper, got extra fields")
+        result
   catch case rf: ReadFailure => throw rf.withRootType(typeName)
 
-final class SingletonCodec[T](value: T) extends ObjectCodec[T]:
+  private def defaultRead(): T = codecs(defaultCaseIdx) match
+    case s: SingletonCodec[?] => s.value.asInstanceOf[T]
+    case _ =>
+      throw ReadFailure(s"$typeName: @defaultCase fallback on absent/unknown discriminator requires a singleton case")
+
 final class FlatSumCodec[T](
   typeName: String,
   caseNames: Array[String],
