@@ -6,48 +6,50 @@ import scala.collection.immutable.HashSet
 import scala.reflect.ClassTag
 
 trait StdCodecs:
-  given intCodec: SimpleCodec[Int] = new:
+  this: MCodec.type =>
+
+  given intCodec: SimpleCodec[Int]:
     def readSimple(in: SimpleInput): Int = in.readInt()
     def writeSimple(out: SimpleOutput, v: Int): Unit = out.writeInt(v)
 
-  given longCodec: SimpleCodec[Long] = new:
+  given longCodec: SimpleCodec[Long]:
     def readSimple(in: SimpleInput): Long = in.readLong()
     def writeSimple(out: SimpleOutput, v: Long): Unit = out.writeLong(v)
 
-  given doubleCodec: SimpleCodec[Double] = new:
+  given doubleCodec: SimpleCodec[Double]:
     def readSimple(in: SimpleInput): Double = in.readDouble()
     def writeSimple(out: SimpleOutput, v: Double): Unit = out.writeDouble(v)
 
-  given booleanCodec: SimpleCodec[Boolean] = new:
+  given booleanCodec: SimpleCodec[Boolean]:
     def readSimple(in: SimpleInput): Boolean = in.readBoolean()
     def writeSimple(out: SimpleOutput, v: Boolean): Unit = out.writeBoolean(v)
 
-  given stringCodec: SimpleCodec[String] = new:
+  given stringCodec: SimpleCodec[String]:
     def readSimple(in: SimpleInput): String = in.readString()
     def writeSimple(out: SimpleOutput, v: String): Unit = out.writeString(v)
 
-  given bigIntCodec: SimpleCodec[BigInt] = new:
+  given bigIntCodec: SimpleCodec[BigInt]:
     def readSimple(in: SimpleInput): BigInt = in.readBigInt()
     def writeSimple(out: SimpleOutput, v: BigInt): Unit = out.writeBigInt(v)
 
-  given bigDecimalCodec: SimpleCodec[BigDecimal] = new:
+  given bigDecimalCodec: SimpleCodec[BigDecimal]:
     def readSimple(in: SimpleInput): BigDecimal = in.readBigDecimal()
     def writeSimple(out: SimpleOutput, v: BigDecimal): Unit = out.writeBigDecimal(v)
 
-  given uuidCodec: SimpleCodec[ju.UUID] = new:
+  given uuidCodec: SimpleCodec[ju.UUID]:
     def readSimple(in: SimpleInput): ju.UUID =
       try ju.UUID.fromString(in.readString())
       catch case e: IllegalArgumentException => throw ReadFailure("invalid UUID", e)
     def writeSimple(out: SimpleOutput, v: ju.UUID): Unit = out.writeString(v.toString)
 
-  given optionCodec: [T: MCodec] => MCodec[Option[T]] = new:
+  given optionCodec: [T: MCodec] => MCodec[Option[T]]:
     def write(out: Output, value: Option[T]): Unit = value match
       case Some(x) => MCodec.write(out, x)
       case None => out.writeNull()
     def read(in: Input): Option[T] =
       if in.readNull() then None else Some(MCodec.read[T](in))
 
-  given eitherCodec: [L: MCodec, R: MCodec] => ObjectCodec[Either[L, R]] = new:
+  given eitherCodec: [L: MCodec, R: MCodec] => ObjectCodec[Either[L, R]]:
     def writeObject(out: ObjectOutput, v: Either[L, R]): Unit = v match
       case Left(l) => MCodec.write(out.writeField("Left"), l)
       case Right(r) => MCodec.write(out.writeField("Right"), r)
@@ -59,10 +61,10 @@ trait StdCodecs:
         case "Right" => Right(withSegment(PathSegment.Case("Right"))(MCodec.read[R](f)))
         case other => throw ReadFailure(s"expected Left/Right, got field: $other")
 
-  inline given tupleCodec: [T <: Tuple] => ListCodec[T] =
-    mkTupleCodec(compiletime.summonAll[Tuple.Map[T, MCodec]].toList.asInstanceOf[List[MCodec[Any]]])
+  inline given tupleCodec: [T <: Tuple] => TupleCodec[T] =
+    TupleCodec(compiletime.summonAll[Tuple.Map[T, MCodec]].toList.asInstanceOf[List[MCodec[Any]]])
 
-  protected def mkTupleCodec[T <: Tuple](codecs: List[MCodec[Any]]): ListCodec[T] = new:
+  protected class TupleCodec[T <: Tuple](codecs: List[MCodec[Any]]) extends ListCodec[T]:
     def writeList(out: ListOutput, value: T): Unit =
       out.declareSize(codecs.size)
       val it = value.productIterator
@@ -76,7 +78,7 @@ trait StdCodecs:
         r
       Tuple.fromArray(elems.toArray[Any]).asInstanceOf[T]
 
-  private def collCodec[C[X] <: Iterable[X], T: MCodec](using fac: Factory[T, C[T]]): ListCodec[C[T]] = new:
+  private class CollectionCodec[C[X] <: Iterable[X], T: MCodec](using fac: Factory[T, C[T]]) extends ListCodec[C[T]]:
     def writeList(out: ListOutput, value: C[T]): Unit =
       value.foreach(MCodec.write(out.writeElement(), _))
     def readList(in: ListInput): C[T] =
@@ -87,14 +89,14 @@ trait StdCodecs:
         idx += 1
       b.result()
 
-  given seqCodec: [C[X] <: collection.Seq[X], T: MCodec] => Factory[T, C[T]] => ListCodec[C[T]] = collCodec[C, T]
-  given setCodec: [C[X] <: collection.Set[X], T: MCodec] => Factory[T, C[T]] => ListCodec[C[T]] = collCodec[C, T]
-  given listCodec: [T: MCodec] => ListCodec[List[T]] = collCodec[List, T]
-  given vectorCodec: [T: MCodec] => ListCodec[Vector[T]] = collCodec[Vector, T]
-  given indexedSeqCodec: [T: MCodec] => ListCodec[IndexedSeq[T]] = collCodec[IndexedSeq, T]
-  given hashSetCodec: [T: MCodec] => ListCodec[HashSet[T]] = collCodec[HashSet, T]
+  given seqCodec: [C[X] <: collection.Seq[X], T: MCodec] => Factory[T, C[T]] => ListCodec[C[T]] = CollectionCodec[C, T]
+  given setCodec: [C[X] <: collection.Set[X], T: MCodec] => Factory[T, C[T]] => ListCodec[C[T]] = CollectionCodec[C, T]
+  given listCodec: [T: MCodec] => ListCodec[List[T]] = CollectionCodec[List, T]
+  given vectorCodec: [T: MCodec] => ListCodec[Vector[T]] = CollectionCodec[Vector, T]
+  given indexedSeqCodec: [T: MCodec] => ListCodec[IndexedSeq[T]] = CollectionCodec[IndexedSeq, T]
+  given hashSetCodec: [T: MCodec] => ListCodec[HashSet[T]] = CollectionCodec[HashSet, T]
 
-  given arrayCodec: [T: {ClassTag, MCodec}] => ListCodec[Array[T]] = new:
+  given arrayCodec: [T: {ClassTag, MCodec}] => ListCodec[Array[T]]:
     def writeList(out: ListOutput, value: Array[T]): Unit =
       var i = 0
       while i < value.length do
@@ -108,7 +110,7 @@ trait StdCodecs:
         idx += 1
       b.result()
 
-  protected def objectMapCodec[K: MKeyCodec as keyCodec, V: MCodec]: ObjectCodec[Map[K, V]] = new:
+  protected class ObjectMapCodec[K: MKeyCodec as keyCodec, V: MCodec] extends ObjectCodec[Map[K, V]]:
     def writeObject(out: ObjectOutput, m: Map[K, V]): Unit = m.foreach: (key, value) =>
       MCodec.write(out.writeField(keyCodec.writeKey(key)), value)
     def readObject(in: ObjectInput): Map[K, V] =
@@ -118,7 +120,7 @@ trait StdCodecs:
         b += keyCodec.readKey(f.fieldName) -> withSegment(PathSegment.Key(f.fieldName))(MCodec.read[V](f))
       b.result()
 
-  protected def pairsMapCodec[K: MCodec, V: MCodec]: ListCodec[Map[K, V]] = new:
+  protected class PairsMapCodec[K: MCodec, V: MCodec] extends ListCodec[Map[K, V]]:
     def writeList(out: ListOutput, m: Map[K, V]): Unit = m.foreach: (key, value) =>
       val pair = out.writeElement().writeList()
       MCodec.write(pair.writeElement(), key)
@@ -140,5 +142,5 @@ trait StdCodecs:
 
   inline given mapCodec: [K: MCodec, V: MCodec] => MCodec[Map[K, V]] =
     scala.compiletime.summonFrom:
-      case given MKeyCodec[K] => objectMapCodec
-      case _ => pairsMapCodec
+      case given MKeyCodec[K] => ObjectMapCodec()
+      case _ => PairsMapCodec()
