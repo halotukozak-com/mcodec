@@ -13,7 +13,7 @@ class OptionalParamTest extends munit.FunSuite, JsonConv:
     assertEquals(fromJson[O1]("{\"o\":5}"), O1(Some(5)))
 
   test("@optionalParam omits None on write"):
-    assertEquals(toJson(O1(None)), "{}")
+    assertEquals(O1(None).toJson, "{}")
 
   test("@optionalParam writes present value"):
-    assertEquals(toJson(O1(Some(5))), "{\"o\":5}")
+    assertEquals(O1(Some(5)).toJson, "{\"o\":5}")

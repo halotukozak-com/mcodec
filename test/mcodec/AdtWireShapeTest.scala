@@ -7,13 +7,13 @@ class AdtWireShapeTest extends munit.FunSuite, JsonConv:
     case Point
 
   test("Circle nested-discriminator wire shape"):
-    assertEquals(toJson[Shape](Shape.Circle(2.0)), "{\"Circle\":{\"radius\":2.0}}")
+    assertEquals((Shape.Circle(2.0): Shape).toJson, "{\"Circle\":{\"radius\":2.0}}")
 
   test("Rectangle nested-discriminator wire shape"):
-    assertEquals(toJson[Shape](Shape.Rectangle(1.0, 2.0)), "{\"Rectangle\":{\"w\":1.0,\"h\":2.0}}")
+    assertEquals((Shape.Rectangle(1.0, 2.0): Shape).toJson, "{\"Rectangle\":{\"w\":1.0,\"h\":2.0}}")
 
   test("case object -> empty nested object"):
-    assertEquals(toJson[Shape](Shape.Point), "{\"Point\":{}}")
+    assertEquals((Shape.Point: Shape).toJson, "{\"Point\":{}}")
 
   test("unknown case name on read raises ReadFailure"):
     intercept[ReadFailure](MCodec[Shape].read(JsonBackend.input("{\"Nope\":{}}")))

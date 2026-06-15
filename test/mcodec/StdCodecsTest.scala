@@ -94,5 +94,5 @@ class StdCodecsTest extends RoundTrip, JsonConv:
     }
 
   test("MANUAL-05 Map[Int, String] round-trips through JSON with string keys"):
-    assertEquals(toJson(Map(1 -> "a")), "{\"1\":\"a\"}")
+    assertEquals(Map(1 -> "a").toJson, "{\"1\":\"a\"}")
     assertEquals(fromJson[Map[Int, String]]("{\"1\":\"a\"}"), Map(1 -> "a"))

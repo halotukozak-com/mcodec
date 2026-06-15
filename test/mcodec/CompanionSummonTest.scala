@@ -8,4 +8,4 @@ object Wrapped:
 class CompanionSummonTest extends munit.FunSuite, JsonConv:
   test("companion-defined given summoned with no import (MANUAL-04)"):
     summon[MCodec[Wrapped.Tagged]]
-    assertEquals(fromJson[Wrapped.Tagged](toJson(Wrapped.Tagged("x"))), Wrapped.Tagged("x"))
+    assertEquals(fromJson[Wrapped.Tagged](Wrapped.Tagged("x").toJson), Wrapped.Tagged("x"))

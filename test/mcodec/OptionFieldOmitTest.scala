@@ -11,7 +11,7 @@ class OptionFieldOmitTest extends munit.FunSuite, JsonConv:
     assertEquals(fromJson[P]("{\"o\":3}"), P(Some(3)))
 
   test("present Option field writes value"):
-    assertEquals(toJson(P(Some(3))), "{\"o\":3}")
+    assertEquals(P(Some(3)).toJson, "{\"o\":3}")
 
   test("absent Option omitted on write"):
-    assertEquals(toJson(P(None)), "{}")
+    assertEquals(P(None).toJson, "{}")
