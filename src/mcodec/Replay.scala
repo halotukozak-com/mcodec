@@ -2,7 +2,7 @@ package mcodec
 
 // Backend-agnostic, fully-materialised snapshot of an Input value, used by FlatSumCodec
 // to buffer a flat object's fields and replay them (in any order) into the selected case
-// body codec. The snapshot is INDEPENDENT of the live cursor (Pitfall 2): each value is
+// body codec. The snapshot is INDEPENDENT of the live cursor: each value is
 // consumed eagerly into this tree at capture time and never refers back to the source Input.
 
 enum CapturedValue:

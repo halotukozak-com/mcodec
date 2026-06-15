@@ -71,7 +71,7 @@ final class NestedSumCodec[T](
   defaultCaseIdx: Int,
 ) extends ObjectCodec[T]:
   // ADT-04 flat-mode reuse hook: nested mode is structurally collision-free
-  // (discriminator is the wrapper key), so this is vacuous now but guards Phase 7 flat mode.
+  // (discriminator is the wrapper key), so this is vacuous now but guards flat sum mode.
   if caseNames.distinct.length != caseNames.length then
     throw ReadFailure(s"$typeName: duplicate case discriminator names: ${caseNames.mkString(", ")}")
   private lazy val codecs = caseCodecs

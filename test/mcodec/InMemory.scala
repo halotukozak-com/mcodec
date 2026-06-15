@@ -1,7 +1,7 @@
 package mcodec
 
 // Test-only in-memory Input/Output fixture proving the Plan-01 contract.
-// NOT shipped library API. The real backend is JSON (Phase 3).
+// NOT shipped library API. The real backend is JSON.
 
 enum MValue:
   case MNull
