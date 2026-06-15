@@ -55,8 +55,8 @@ trait StdCodecs:
       if !in.hasNext then throw ReadFailure("expected Left/Right field, got empty object")
       val f = in.nextField()
       f.fieldName match
-        case "Left" => Left(MCodec.read[L](f))
-        case "Right" => Right(MCodec.read[R](f))
+        case "Left" => Left(withSegment(PathSegment.Case("Left"))(MCodec.read[L](f)))
+        case "Right" => Right(withSegment(PathSegment.Case("Right"))(MCodec.read[R](f)))
         case other => throw ReadFailure(s"expected Left/Right, got field: $other")
 
   inline given tupleCodec: [T <: Tuple] => ListCodec[T] =
@@ -68,9 +68,12 @@ trait StdCodecs:
       val it = value.productIterator
       codecs.foreach(c => c.write(out.writeElement(), it.next()))
     def readList(in: ListInput): T =
+      var idx = 0
       val elems = codecs.map: c =>
         if !in.hasNext then throw ReadFailure("expected tuple element")
-        c.read(in.nextElement())
+        val r = withSegment(PathSegment.Index(idx))(c.read(in.nextElement()))
+        idx += 1
+        r
       Tuple.fromArray(elems.toArray[Any]).asInstanceOf[T]
 
   private def collCodec[C[X] <: Iterable[X], T: MCodec](using fac: Factory[T, C[T]]): ListCodec[C[T]] = new:
@@ -78,7 +81,10 @@ trait StdCodecs:
       value.foreach(MCodec.write(out.writeElement(), _))
     def readList(in: ListInput): C[T] =
       val b = fac.newBuilder
-      while in.hasNext do b += MCodec.read[T](in.nextElement())
+      var idx = 0
+      while in.hasNext do
+        b += withSegment(PathSegment.Index(idx))(MCodec.read[T](in.nextElement()))
+        idx += 1
       b.result()
 
   given seqCodec: [C[X] <: collection.Seq[X], T: MCodec] => Factory[T, C[T]] => ListCodec[C[T]] = collCodec[C, T]
@@ -96,7 +102,10 @@ trait StdCodecs:
         i += 1
     def readList(in: ListInput): Array[T] =
       val b = Array.newBuilder[T]
-      while in.hasNext do b += MCodec.read[T](in.nextElement())
+      var idx = 0
+      while in.hasNext do
+        b += withSegment(PathSegment.Index(idx))(MCodec.read[T](in.nextElement()))
+        idx += 1
       b.result()
 
   protected def objectMapCodec[K: MKeyCodec as keyCodec, V: MCodec]: ObjectCodec[Map[K, V]] = new:
@@ -106,7 +115,7 @@ trait StdCodecs:
       val b = Map.newBuilder[K, V]
       while in.hasNext do
         val f = in.nextField()
-        b += keyCodec.readKey(f.fieldName) -> MCodec.read[V](f)
+        b += keyCodec.readKey(f.fieldName) -> withSegment(PathSegment.Key(f.fieldName))(MCodec.read[V](f))
       b.result()
 
   protected def pairsMapCodec[K: MCodec, V: MCodec]: ListCodec[Map[K, V]] = new:
@@ -117,14 +126,16 @@ trait StdCodecs:
       pair.finish()
     def readList(in: ListInput): Map[K, V] =
       val b = Map.newBuilder[K, V]
+      var entryIdx = 0
       while in.hasNext do
         val pair = in.nextElement().readList()
         if !pair.hasNext then throw ReadFailure("expected map entry key")
-        val key = MCodec.read[K](pair.nextElement())
+        val key = withSegment(PathSegment.Index(entryIdx))(MCodec.read[K](pair.nextElement()))
         if !pair.hasNext then throw ReadFailure("expected map entry value")
-        val value = MCodec.read[V](pair.nextElement())
+        val value = withSegment(PathSegment.Index(entryIdx))(MCodec.read[V](pair.nextElement()))
         pair.skipRemaining()
         b += key -> value
+        entryIdx += 1
       b.result()
 
   inline given mapCodec: [K: MCodec, V: MCodec] => MCodec[Map[K, V]] =

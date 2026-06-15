@@ -3,16 +3,29 @@ package mcodec
 final class JsonReader(s: String):
   private var i = 0
 
+  private def posSuffix(at: Int): String =
+    var line = 1
+    var lastNl = -1
+    var k = 0
+    val end = math.min(at, s.length)
+    while k < end do
+      if s.charAt(k) == '\n' then
+        line += 1
+        lastNl = k
+      k += 1
+    val col = at - lastNl
+    s" (at $line:$col)"
+
   private def skipWs(): Unit =
     while i < s.length &&
       (s.charAt(i) match
-        case ' ' | '\t' | '\n' | '\r' => true;
+        case ' ' | '\t' | '\n' | '\r' => true
         case _ => false)
     do i += 1
 
   private def expect(c: Char): Unit =
     skipWs()
-    if i >= s.length || s.charAt(i) != c then throw ReadFailure(s"expected '$c'")
+    if i >= s.length || s.charAt(i) != c then throw ReadFailure(s"expected '$c'" + posSuffix(i))
     i += 1
 
   def readRawNumber(): String =
@@ -24,7 +37,7 @@ final class JsonReader(s: String):
         (c >= '0' && c <= '9') || c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-'
       }
     do i += 1
-    if i == start then throw ReadFailure("expected number")
+    if i == start then throw ReadFailure("expected number" + posSuffix(start))
     s.substring(start, i)
 
   def readRawString(): String =
@@ -33,11 +46,13 @@ final class JsonReader(s: String):
     val b = new java.lang.StringBuilder
     var done = false
     while !done do
+      if i >= s.length then throw ReadFailure("unterminated string" + posSuffix(i))
       val c = s.charAt(i)
       i += 1
       c match
         case '"' => done = true
         case '\\' =>
+          if i >= s.length then throw ReadFailure("unterminated string" + posSuffix(i))
           val e = s.charAt(i)
           i += 1
           e match
@@ -50,10 +65,11 @@ final class JsonReader(s: String):
             case 'r' => b.append('\r')
             case 't' => b.append('\t')
             case 'u' =>
+              if i + 4 > s.length then throw ReadFailure("truncated \\u escape" + posSuffix(i))
               val hex = s.substring(i, i + 4)
               i += 4
               b.append(Integer.parseInt(hex, 16).toChar)
-            case other => throw ReadFailure(s"invalid escape: \\$other")
+            case other => throw ReadFailure(s"invalid escape: \\$other" + posSuffix(i))
         case other => b.append(other)
     b.toString
 
@@ -75,10 +91,11 @@ final class JsonReader(s: String):
     else if i + 5 <= s.length && s.startsWith("false", i) then
       i += 5
       false
-    else throw ReadFailure("expected boolean")
+    else throw ReadFailure("expected boolean" + posSuffix(i))
 
   def skipValue(): Unit =
     skipWs()
+    if i >= s.length then throw ReadFailure("unexpected end of input" + posSuffix(i))
     s.charAt(i) match
       case '{' => skipContainer('{', '}')
       case '[' => skipContainer('[', ']')
@@ -87,7 +104,7 @@ final class JsonReader(s: String):
         val c = s.charAt(i)
         if c == 't' || c == 'f' then readBoolean()
         else if c == 'n' then
-          if !readNull() then throw ReadFailure("invalid token")
+          if !readNull() then throw ReadFailure("invalid token" + posSuffix(i))
         else readRawNumber()
 
   private def skipContainer(open: Char, close: Char): Unit =
@@ -95,12 +112,21 @@ final class JsonReader(s: String):
     var depth = 1
     while depth > 0 do
       skipWs()
+      if i >= s.length then throw ReadFailure("unterminated container" + posSuffix(i))
       val c = s.charAt(i)
       c match
-        case `open` => depth += 1; i += 1
-        case `close` => depth -= 1; i += 1
+        case `open` =>
+          depth += 1
+          i += 1
+        case `close` =>
+          depth -= 1
+          i += 1
         case '"' => readRawString()
         case _ => i += 1
+
+  private[mcodec] def finishTopLevel(): Unit =
+    skipWs()
+    if i < s.length then throw ReadFailure("trailing data after top-level value" + posSuffix(i))
 
   // package-private cursor helpers for list/object inputs
   private[mcodec] def consume(c: Char): Unit = expect(c)
