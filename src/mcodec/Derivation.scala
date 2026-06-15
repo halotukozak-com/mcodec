@@ -3,6 +3,8 @@ package mcodec
 import made.*
 import made.annotation.optionalParam
 
+import scala.annotation.tailrec
+
 trait Derivation:
   transparent inline def derivedRec[T: Made.Of as m]: MCodec[T] =
     val deferred = new Deferred[T]
@@ -24,9 +26,20 @@ trait Derivation:
     m.elems
       .mapAs[MadeFieldElem][[e] =>> Option[Any]]([e <: MadeFieldElem] => elem => elem.default)
       .toArrayOf[Option[Any]],
-    m.elems.hasAnnotations[optionalParam].toArrayOf[Boolean](using containsOnly.refl),
+    m.elems.hasAnnotations[optionalParam].toArrayOf[Boolean],
     isOptionFlags[m.ElemTypes].toArray,
     m.fromUnsafeArray,
+    compiletime
+      .constValueTuple[Tuple.Map[m.GeneratedElems, MadeElem.ExtractLabel]]
+      .toArrayOf[String],
+    m.generatedElems
+      .mapAs[GeneratedMadeElem][[e] =>> T => Any]([e <: GeneratedMadeElem] =>
+        elem => outer => elem.apply(outer.asInstanceOf[elem.OuterType]),
+      )
+      .toArrayOf[T => Any],
+    compiletime
+      .summonAll[Tuple.Map[Tuple.Map[m.GeneratedElems, MadeElem.ExtractOf], MCodec]]
+      .toArrayOf[MCodec[Any]](using containsOnly.refl),
   )
 
   inline def isOptionFlags[Elems <: Tuple]: List[Boolean] = inline compiletime.erasedValue[Elems] match
@@ -34,12 +47,42 @@ trait Derivation:
     case _: (Option[?] *: tail) => true :: isOptionFlags[tail]
     case _: (head *: tail) => false :: isOptionFlags[tail]
 
-  inline def deriveSum[T](m: Made.SumOf[T]): MCodec[T] = NestedSumCodec[T](
-    compiletime.constValue[m.Label],
-    compiletime.constValueTuple[m.ElemLabels].toArrayOf[String],
-    summonOrDeriveCases[m.ElemTypes].toArray,
-    m.ordinal,
-  )
+  inline def deriveSum[T](m: Made.SumOf[T]): MCodec[T] =
+    inline if m.hasAnnotation[mcodec.annotation.flatten] then
+      FlatSumCodec[T](
+        compiletime.constValue[m.Label],
+        compiletime.constValueTuple[m.ElemLabels].toArrayOf[String],
+        summonOrDeriveCases[m.ElemTypes].toArray,
+        m.ordinal,
+        m.getAnnotation[mcodec.annotation.flatten].fold("_case")(_.key),
+        defaultCaseIdx(m.elems.hasAnnotations[mcodec.annotation.defaultCase]),
+      )
+    else
+      NestedSumCodec[T](
+        compiletime.constValue[m.Label],
+        compiletime.constValueTuple[m.ElemLabels].toArrayOf[String],
+        summonOrDeriveCases[m.ElemTypes].toArray,
+        m.ordinal,
+        defaultCaseIdx(m.elems.hasAnnotations[mcodec.annotation.defaultCase]),
+      )
+
+  // Compile-time guard (>1 @defaultCase is an error) + index selection.
+  transparent inline def defaultCaseIdx(inline flags: Tuple): Int = inline flags match
+    case _: EmptyTuple => -1
+    case fs: (head *: tail) =>
+      inline if compiletime.constValue[head & Boolean] then
+        rejectMoreDefaults(fs.tail)
+        0
+      else
+        inline defaultCaseIdx(fs.tail) match
+          case -1 => -1
+          case n => n + 1
+
+  inline def rejectMoreDefaults(inline flags: Tuple): Unit = inline flags match
+    case _: EmptyTuple => ()
+    case fs: (head *: tail) =>
+      inline if compiletime.constValue[head & Boolean] then compiletime.error("more than one @defaultCase in hierarchy")
+      else rejectMoreDefaults(fs.tail)
 
   inline def summonOrDeriveCases[Elems <: Tuple]: List[MCodec[Any]] = inline compiletime.erasedValue[Elems] match
     case _: EmptyTuple => Nil
