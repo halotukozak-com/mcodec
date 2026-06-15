@@ -97,5 +97,4 @@ scala-cli --power fmt .
 ## Acknowledgements
 
 mcodec is inspired by the [**AVSystem commons**](https://github.com/AVSystem/scala-commons) by [**ghik
-**](https://github.com/ghik), whose
-`GenCodec` is the model for the codec design
+**](https://github.com/ghik), whose `GenCodec` is the model for the codec design
