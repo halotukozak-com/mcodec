@@ -40,6 +40,61 @@ trait StdCodecs:
       catch case e: IllegalArgumentException => throw ReadFailure("invalid UUID", e)
     def writeSimple(out: SimpleOutput, v: ju.UUID): Unit = out.writeString(v.toString)
 
+  given byteCodec: SimpleCodec[Byte]:
+    def readSimple(in: SimpleInput): Byte = in.readByte()
+    def writeSimple(out: SimpleOutput, v: Byte): Unit = out.writeByte(v)
+
+  given shortCodec: SimpleCodec[Short]:
+    def readSimple(in: SimpleInput): Short = in.readShort()
+    def writeSimple(out: SimpleOutput, v: Short): Unit = out.writeShort(v)
+
+  given charCodec: SimpleCodec[Char]:
+    def readSimple(in: SimpleInput): Char = in.readChar()
+    def writeSimple(out: SimpleOutput, v: Char): Unit = out.writeChar(v)
+
+  given floatCodec: SimpleCodec[Float]:
+    def readSimple(in: SimpleInput): Float = in.readFloat()
+    def writeSimple(out: SimpleOutput, v: Float): Unit = out.writeFloat(v)
+
+  // epoch millis; java.sql.Timestamp covered as Date subclass
+  given dateCodec: SimpleCodec[ju.Date]:
+    def readSimple(in: SimpleInput): ju.Date = new ju.Date(in.readTimestamp())
+    def writeSimple(out: SimpleOutput, v: ju.Date): Unit = out.writeTimestamp(v.getTime)
+
+  given byteArrayCodec: SimpleCodec[Array[Byte]]:
+    def readSimple(in: SimpleInput): Array[Byte] = in.readBinary()
+    def writeSimple(out: SimpleOutput, v: Array[Byte]): Unit = out.writeBinary(v)
+
+  given symbolCodec: SimpleCodec[Symbol]:
+    def readSimple(in: SimpleInput): Symbol = Symbol(in.readString())
+    def writeSimple(out: SimpleOutput, v: Symbol): Unit = out.writeString(v.name)
+
+  given unitCodec: MCodec[Unit] = MCodec.create(
+    in => if in.readNull() then () else throw ReadFailure("expected null for Unit"),
+    (out, _) => out.writeNull(),
+  )
+
+  given nullCodec: MCodec[Null] = MCodec.create(
+    in =>
+      in.readNull()
+      null
+    ,
+    (out, _) => out.writeNull(),
+  )
+
+  given voidCodec: MCodec[Void | Null] = MCodec.create(
+    in =>
+      in.readNull()
+      null
+    ,
+    (out, _) => out.writeNull(),
+  )
+
+  given nothingCodec: MCodec[Nothing] = MCodec.create(
+    _ => throw ReadFailure("cannot read a Nothing value"),
+    (_, _) => throw WriteFailure("cannot write a Nothing value"),
+  )
+
   given optionCodec: [T: MCodec] => MCodec[Option[T]]:
     def write(out: Output, value: Option[T]): Unit = value match
       case Some(x) => MCodec.write(out, x)
