@@ -1,6 +1,7 @@
 package mcodec
 
 import made.*
+import made.annotation.optionalParam
 
 import scala.annotation.publicInBinary
 
@@ -30,12 +31,25 @@ trait Derivation:
   inline def deriveProduct[T](m: Made.ProductOf[T]): MCodec[T] = mkProductCodec[T](
     compiletime.constValueTuple[m.ElemLabels].toArrayOf[String],
     compiletime.summonAll[Tuple.Map[m.ElemTypes, MCodec]].toArrayOf[MCodec[Any]](using containsOnly.refl),
+    m.elems
+      .mapAs[MadeFieldElem](using containsOnly.refl)[[e] =>> Option[Any]]([e <: MadeFieldElem] => elem => elem.default)
+      .toArrayOf[Option[Any]](using containsOnly.refl),
+    m.elems.hasAnnotations[optionalParam].toArrayOf[Boolean](using containsOnly.refl),
+    isOptionFlags[m.ElemTypes].toArray,
     m.fromUnsafeArray,
   )
+
+  inline def isOptionFlags[Elems <: Tuple]: List[Boolean] = inline compiletime.erasedValue[Elems] match
+    case _: EmptyTuple => Nil
+    case _: (Option[?] *: tail) => true :: isOptionFlags[tail]
+    case _: (head *: tail) => false :: isOptionFlags[tail]
 
   @publicInBinary private[Derivation] def mkProductCodec[T](
     labels: Array[String],
     childCodecsByName: => Array[MCodec[Any]],
+    defaults: Array[Option[Any]],
+    optionalFlags: Array[Boolean],
+    isOption: Array[Boolean],
     fromArray: Array[Any] => T,
   ): ObjectCodec[T] = new:
     private lazy val childCodecs = childCodecsByName
@@ -45,7 +59,9 @@ trait Derivation:
       val p = value.asInstanceOf[Product]
       var i = 0
       while i < labels.length do
-        childCodecs(i).write(out.writeField(labels(i)), p.productElement(i))
+        val v = p.productElement(i)
+        if (optionalFlags(i) || isOption(i)) && (v == None) then ()
+        else childCodecs(i).write(out.writeField(labels(i)), v)
         i += 1
     def readObject(in: ObjectInput): T =
       val values = new Array[Any](labels.length)
@@ -59,7 +75,12 @@ trait Derivation:
           case None => f.skip()
       var i = 0
       while i < labels.length do
-        if !seen(i) then throw ReadFailure(s"missing field: ${labels(i)}")
+        if !seen(i) then
+          values(i) = defaults(i) match
+            case Some(d) => d
+            case None =>
+              if optionalFlags(i) || isOption(i) then None
+              else throw ReadFailure(s"missing field: ${labels(i)}")
         i += 1
       fromArray(values)
 
