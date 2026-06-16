@@ -199,6 +199,23 @@ final class FlatSumCodec[T](
       codecs(idx).asInstanceOf[ObjectCodec[Any]].readObject(replay).asInstanceOf[T]
   catch case rf: ReadFailure => throw rf.withRootType(typeName)
 
+final class EnumStringCodec[T](
+  typeName: String,
+  caseNames: Array[String],
+  caseCodecs: => Array[MCodec[Any]],
+  ordinalOf: T => Int,
+) extends SimpleCodec[T]:
+  private lazy val values: Array[Any] = caseCodecs.map:
+    case s: SingletonCodec[?] => s.value
+    case _ => throw ReadFailure(s"$typeName: @stringEnum requires every case to be a singleton")
+  def writeSimple(out: SimpleOutput, value: T): Unit =
+    out.writeString(caseNames(ordinalOf(value)))
+  def readSimple(in: SimpleInput): T =
+    val s = in.readString()
+    val idx = caseNames.indexOf(s)
+    if idx < 0 then throw ReadFailure(s"$typeName: unknown case $s")
+    else values(idx).asInstanceOf[T]
+
 final class SingletonCodec[T](val value: T) extends ObjectCodec[T], SizedCodec[T]:
   private[mcodec] def bodyFieldNames: Array[String] = Array.empty
   def sizeOf(value: T): Int = 0

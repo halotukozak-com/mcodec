@@ -3,8 +3,6 @@ package mcodec
 import made.*
 import made.annotation.optionalParam
 
-import scala.annotation.tailrec
-
 trait Derivation:
   this: MCodec.type =>
   transparent inline def derivedRec[T: Made.Of as m]: MCodec[T] =
@@ -50,7 +48,14 @@ trait Derivation:
     case _: (head *: tail) => false :: isOptionFlags[tail]
 
   inline def deriveSum[T](m: Made.SumOf[T]): MCodec[T] =
-    inline if m.hasAnnotation[mcodec.annotation.flatten] then
+    inline if m.hasAnnotation[mcodec.annotation.stringEnum] then
+      EnumStringCodec[T](
+        compiletime.constValue[m.Label],
+        compiletime.constValueTuple[m.ElemLabels].toArrayOf[String],
+        summonOrDeriveCases[m.ElemTypes].toArray,
+        m.ordinal,
+      )
+    else inline if m.hasAnnotation[mcodec.annotation.flatten] then
       FlatSumCodec[T](
         compiletime.constValue[m.Label],
         compiletime.constValueTuple[m.ElemLabels].toArrayOf[String],
@@ -67,6 +72,24 @@ trait Derivation:
         m.ordinal,
         defaultCaseIdx(m.elems.hasAnnotations[mcodec.annotation.defaultCase]),
       )
+
+  inline def forSealedEnum[T: Made.Of as m]: MCodec[T] = inline m match
+    case sm: Made.SumOf[T] =>
+      val caseNames = compiletime.constValueTuple[sm.ElemLabels].toArrayOf[String]
+      val values = summonOrDeriveCases[sm.ElemTypes].toArray.map:
+        case s: SingletonCodec[?] => s.value
+        case _ => throw ReadFailure(s"forSealedEnum requires every case to be a singleton")
+      val ordinal = sm.ordinal
+      fromKeyCodec[T](
+        using MKeyCodec.create(
+          v => caseNames(ordinal(v)),
+          s =>
+            val idx = caseNames.indexOf(s)
+            if idx < 0 then throw ReadFailure(s"unknown case: $s")
+            else values(idx).asInstanceOf[T],
+        ),
+      )
+    case _ => compiletime.error("forSealedEnum requires a sealed trait / enum of singleton cases")
 
   // Compile-time guard (>1 @defaultCase is an error) + index selection.
   transparent inline def defaultCaseIdx(inline flags: Tuple): Int = inline flags match
