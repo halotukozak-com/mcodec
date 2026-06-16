@@ -41,9 +41,28 @@ object CapturedValue:
       case JsonToken.Bool => CBoolean(j.readSimple().readBoolean())
       case JsonToken.Num => CNumber(j.rawNumber())
 
-  // Generic fallback: flat-mode reads run against the JSON backend; other backends are unsupported.
+  // Generic fallback: backend-neutral capture using peekKind + the public Input API. Eager (no live cursor).
   private def captureGeneric(in: Input): CapturedValue =
-    throw ReadFailure("flat read: cannot snapshot value from this backend")
+    in.peekKind() match
+      case InputKind.Null => CNull
+      case InputKind.Object =>
+        val oi = in.readObject()
+        val b = Vector.newBuilder[(String, CapturedValue)]
+        while oi.hasNext do
+          val f = oi.nextField()
+          b += (f.fieldName -> capture(f))
+        CObject(b.result())
+      case InputKind.List =>
+        val li = in.readList()
+        val b = Vector.newBuilder[CapturedValue]
+        while li.hasNext do b += capture(li.nextElement())
+        CList(b.result())
+      case InputKind.String => CString(in.readSimple().readString())
+      case InputKind.Boolean => CBoolean(in.readSimple().readBoolean())
+      case InputKind.Number =>
+        // No raw lexeme on a generic SimpleInput. BigDecimal preserves both integral and fractional
+        // numbers losslessly; CapturedInput re-parses the lexeme per the consumer's typed read.
+        CNumber(in.readSimple().readBigDecimal().toString)
 
 // Replays a captured value as an Input. Simple values re-parse their snapshot lazily per the
 // typed read the consumer chooses (number lexeme is re-parsed to Int/Long/Double/BigInt/BigDecimal).

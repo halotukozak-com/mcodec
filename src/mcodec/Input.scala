@@ -1,5 +1,8 @@
 package mcodec
 
+enum InputKind:
+  case Null, String, Boolean, Number, List, Object
+
 trait Input:
   /** Returns true (and consumes the value) if it is null, otherwise returns false and leaves the cursor. */
   def readNull(): Boolean
@@ -8,6 +11,12 @@ trait Input:
   def readObject(): ObjectInput
   def skip(): Unit
   final def skipValue(): Unit = skip()
+
+  /**
+   * Non-consuming probe of the next value's kind. Default backends that cannot peek throw; backends used for
+   * flat-sum/@outOfOrder capture (JSON, CBOR) override it.
+   */
+  def peekKind(): InputKind = throw ReadFailure("peekKind not supported by this backend")
 
 trait SimpleInput:
   def readString(): String

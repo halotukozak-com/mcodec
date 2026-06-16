@@ -183,6 +183,13 @@ class JsonInput(reader: JsonReader) extends InputAndSimpleInput:
   private[mcodec] def peekToken: JsonToken = reader.peekToken
   private[mcodec] def rawNumber(): String = reader.readRawNumber()
 
+  override def peekKind(): InputKind = reader.peekToken match
+    case JsonToken.Obj => InputKind.Object
+    case JsonToken.Arr => InputKind.List
+    case JsonToken.Str => InputKind.String
+    case JsonToken.Bool => InputKind.Boolean
+    case JsonToken.Num => InputKind.Number
+
   private def parseIntLexeme(lex: String): Int =
     try Integer.parseInt(lex)
     catch
