@@ -1,6 +1,9 @@
 package mcodec
 
 import made.annotation.{generated, optionalParam}
+import mcodec.annotation.transientDefault
+
+case class TDSized(@transientDefault x: Int = 7, keep: String) derives MCodec
 
 case class AllPresent(a: Int, b: String, c: Boolean) derives MCodec
 
@@ -68,3 +71,7 @@ class SizedCodecTest extends munit.FunSuite, JsonConv:
 
   test("object map declares its entry count"):
     assertEquals(declaredOf(Map("a" -> 1, "b" -> 2)), 2)
+
+  test("@transientDefault omitted field not counted; non-default counted"):
+    assertEquals(declaredOf(TDSized(7, "a")), 1)
+    assertEquals(declaredOf(TDSized(9, "a")), 2)

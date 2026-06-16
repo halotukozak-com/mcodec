@@ -29,6 +29,7 @@ trait Derivation:
       .toArrayOf[Option[Any]],
     m.elems.hasAnnotations[optionalParam].toArrayOf[Boolean],
     isOptionFlags[m.ElemTypes].toArray,
+    m.elems.hasAnnotations[mcodec.annotation.transientDefault].toArrayOf[Boolean],
     m.fromUnsafeArray,
     compiletime
       .constValueTuple[Tuple.Map[m.GeneratedElems, MadeElem.ExtractLabel]]

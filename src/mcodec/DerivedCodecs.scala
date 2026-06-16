@@ -18,6 +18,7 @@ final class ProductCodec[T](
   defaults: Array[Option[Any]],
   optionalFlags: Array[Boolean],
   isOption: Array[Boolean],
+  transientDefaultFlags: Array[Boolean],
   fromArray: Array[Any] => T,
   genLabels: Array[String],
   genGetters: Array[T => Any],
@@ -29,9 +30,11 @@ final class ProductCodec[T](
   private lazy val genCodecs = genCodecsByName
   private val byName = labels.zipWithIndex.toMap
 
-  // Single source of truth for both counting and writing. A transient-default
-  // clause slots in here additively without re-shaping the predicate.
-  private def isOmitted(i: Int, p: Product): Boolean = (optionalFlags(i) || isOption(i)) && (p.productElement(i) == None)
+  // Single source of truth for both counting and writing. Structural `==` is the
+  // transient-default contract; Array-typed defaults compare by reference (rarely omitted).
+  private def isOmitted(i: Int, p: Product): Boolean =
+    ((optionalFlags(i) || isOption(i)) && (p.productElement(i) == None)) ||
+      (transientDefaultFlags(i) && defaults(i).contains(p.productElement(i)))
 
   def sizeOf(value: T): Int =
     val p = value.asInstanceOf[Product]
@@ -58,6 +61,7 @@ final class ProductCodec[T](
   def writeObject(out: ObjectOutput, value: T): Unit =
     out.declareSize(sizeOf(value))
     writeFieldsOnly(out, value)
+
   def readObject(in: ObjectInput): T = try
     val values = new Array[Any](labels.length)
     val seen = new Array[Boolean](labels.length)
