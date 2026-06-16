@@ -76,7 +76,7 @@ final class ProductCodec[T](
           case Some(d) => d
           case None =>
             if optionalFlags(i) || isOption(i) then None
-            else throw ReadFailure(s"missing field: ${labels(i)}")
+            else throw new MissingField(s"missing field: ${labels(i)}")
       i += 1
     fromArray(values)
   catch case rf: ReadFailure => throw rf.withRootType(typeName)
@@ -110,7 +110,7 @@ final class NestedSumCodec[T](
         if defaultCaseIdx >= 0 then
           f.skip()
           defaultRead()
-        else throw ReadFailure(s"unknown case ${f.fieldName}")
+        else throw new UnknownCase(s"unknown case ${f.fieldName}")
       else
         val result =
           withSegment(PathSegment.Case(f.fieldName)):

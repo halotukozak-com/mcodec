@@ -23,7 +23,7 @@ object PathSegment:
       case Key(k) => sb.append('[').append(k).append(']')
     sb.toString
 
-class ReadFailure private (
+class ReadFailure protected (
   val reason: String,
   val path: List[PathSegment],
   val rootType: String | Null,
@@ -33,12 +33,22 @@ class ReadFailure private (
   def this(msg: String) = this(msg, Nil, null, null)
   def this(msg: String, cause: Throwable | Null) = this(msg, Nil, null, cause)
 
+  // Subtype-preserving reconstruction: typed subclasses override to return their own
+  // type so prepend/withRootType keep the dynamic subtype.
+  protected def rebuild(
+    reason: String,
+    path: List[PathSegment],
+    rootType: String | Null,
+    cause: Throwable | Null,
+  ): ReadFailure =
+    new ReadFailure(reason, path, rootType, cause)
+
   def prepend(seg: PathSegment): ReadFailure =
     val keptCause = if cause == null then this else cause
-    new ReadFailure(reason, seg :: path, rootType, keptCause)
+    rebuild(reason, seg :: path, rootType, keptCause)
 
   def withRootType(t: String): ReadFailure =
-    new ReadFailure(reason, path, t, cause)
+    rebuild(reason, path, t, cause)
 
   override def fillInStackTrace(): Throwable =
     if cause == null then super.fillInStackTrace() else this
@@ -50,6 +60,52 @@ object ReadFailure:
       case t => t
     if path.isEmpty then s"Failed to read $rt: $reason"
     else s"Failed to read $rt at ${PathSegment.render(path)}: $reason"
+
+final class MissingField protected (
+  reason: String,
+  path: List[PathSegment],
+  rootType: String | Null,
+  cause: Throwable | Null,
+) extends ReadFailure(reason, path, rootType, cause):
+  def this(msg: String) = this(msg, Nil, null, null)
+  override protected def rebuild(
+    reason: String,
+    path: List[PathSegment],
+    rootType: String | Null,
+    cause: Throwable | Null,
+  ): ReadFailure =
+    new MissingField(reason, path, rootType, cause)
+
+final class UnknownCase protected (
+  reason: String,
+  path: List[PathSegment],
+  rootType: String | Null,
+  cause: Throwable | Null,
+) extends ReadFailure(reason, path, rootType, cause):
+  def this(msg: String) = this(msg, Nil, null, null)
+  override protected def rebuild(
+    reason: String,
+    path: List[PathSegment],
+    rootType: String | Null,
+    cause: Throwable | Null,
+  ): ReadFailure =
+    new UnknownCase(reason, path, rootType, cause)
+
+final class CaseReadFailed protected (
+  reason: String,
+  path: List[PathSegment],
+  rootType: String | Null,
+  cause: Throwable | Null,
+) extends ReadFailure(reason, path, rootType, cause):
+  def this(msg: String) = this(msg, Nil, null, null)
+  def this(msg: String, cause: Throwable | Null) = this(msg, Nil, null, cause)
+  override protected def rebuild(
+    reason: String,
+    path: List[PathSegment],
+    rootType: String | Null,
+    cause: Throwable | Null,
+  ): ReadFailure =
+    new CaseReadFailed(reason, path, rootType, cause)
 
 inline def withSegment[A](seg: PathSegment)(inline body: A): A =
   try body
