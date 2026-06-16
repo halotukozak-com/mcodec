@@ -19,6 +19,7 @@ final class ProductCodec[T](
   optionalFlags: Array[Boolean],
   isOption: Array[Boolean],
   transientDefaultFlags: Array[Boolean],
+  outOfOrderFlags: Array[Boolean],
   fromArray: Array[Any] => T,
   genLabels: Array[String],
   genGetters: Array[T => Any],
@@ -65,14 +66,20 @@ final class ProductCodec[T](
   def readObject(in: ObjectInput): T = try
     val values = new Array[Any](labels.length)
     val seen = new Array[Boolean](labels.length)
+    val deferred = scala.collection.mutable.ArrayBuffer.empty[(Int, CapturedValue)]
     while in.hasNext do
       val f = in.nextField()
       byName.get(f.fieldName) match
         case Some(idx) =>
-          values(idx) = withSegment(PathSegment.Field(f.fieldName)):
-            childCodecs(idx).read(f)
+          if outOfOrderFlags(idx) then deferred += (idx -> CapturedValue.capture(f))
+          else
+            values(idx) = withSegment(PathSegment.Field(f.fieldName)):
+              childCodecs(idx).read(f)
           seen(idx) = true
         case None => f.skip()
+    deferred.foreach: (idx, cv) =>
+      values(idx) = withSegment(PathSegment.Field(labels(idx))):
+        childCodecs(idx).read(new CapturedInput(cv))
     var i = 0
     while i < labels.length do
       if !seen(i) then
