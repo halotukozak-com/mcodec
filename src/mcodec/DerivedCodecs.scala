@@ -22,24 +22,42 @@ final class ProductCodec[T](
   genLabels: Array[String],
   genGetters: Array[T => Any],
   genCodecsByName: => Array[MCodec[Any]],
-) extends ObjectCodec[T]:
+) extends ObjectCodec[T],
+    SizedCodec[T]:
   private[mcodec] def bodyFieldNames: Array[String] = labels
   private lazy val childCodecs = childCodecsByName
   private lazy val genCodecs = genCodecsByName
   private val byName = labels.zipWithIndex.toMap
-  def writeObject(out: ObjectOutput, value: T): Unit =
-    out.declareSize(labels.length + genLabels.length)
+
+  // Single source of truth for both counting and writing. A transient-default
+  // clause slots in here additively without re-shaping the predicate.
+  private def isOmitted(i: Int, p: Product): Boolean = (optionalFlags(i) || isOption(i)) && (p.productElement(i) == None)
+
+  def sizeOf(value: T): Int =
+    val p = value.asInstanceOf[Product]
+    var omitted = 0
+    var i = 0
+    while i < labels.length do
+      if isOmitted(i, p) then omitted += 1
+      i += 1
+    (labels.length - omitted) + genLabels.length
+
+  private[mcodec] def writeFieldsOnly(out: ObjectOutput, value: T): Unit =
     val p = value.asInstanceOf[Product]
     var i = 0
     while i < labels.length do
       val v = p.productElement(i)
-      if (optionalFlags(i) || isOption(i)) && (v == None) then ()
+      if isOmitted(i, p) then ()
       else childCodecs(i).write(out.writeField(labels(i)), v)
       i += 1
     var g = 0
     while g < genLabels.length do
       genCodecs(g).write(out.writeField(genLabels(g)), genGetters(g)(value))
       g += 1
+
+  def writeObject(out: ObjectOutput, value: T): Unit =
+    out.declareSize(sizeOf(value))
+    writeFieldsOnly(out, value)
   def readObject(in: ObjectInput): T = try
     val values = new Array[Any](labels.length)
     val seen = new Array[Boolean](labels.length)
@@ -69,15 +87,17 @@ final class NestedSumCodec[T](
   caseCodecs: => Array[MCodec[Any]],
   ordinalOf: T => Int,
   defaultCaseIdx: Int,
-) extends ObjectCodec[T]:
+) extends ObjectCodec[T],
+    SizedCodec[T]:
   // ADT-04 flat-mode reuse hook: nested mode is structurally collision-free
   // (discriminator is the wrapper key), so this is vacuous now but guards flat sum mode.
   if caseNames.distinct.length != caseNames.length then
     throw ReadFailure(s"$typeName: duplicate case discriminator names: ${caseNames.mkString(", ")}")
   private lazy val codecs = caseCodecs
+  def sizeOf(value: T): Int = 1
   def writeObject(out: ObjectOutput, value: T): Unit =
     val idx = ordinalOf(value)
-    out.declareSize(1)
+    out.declareSize(sizeOf(value))
     codecs(idx).write(out.writeField(caseNames(idx)), value)
   def readObject(in: ObjectInput): T = try
     if !in.hasNext then
@@ -112,7 +132,8 @@ final class FlatSumCodec[T](
   ordinalOf: T => Int,
   caseFieldName: String,
   defaultCaseIdx: Int,
-) extends ObjectCodec[T]:
+) extends ObjectCodec[T],
+    SizedCodec[T]:
   if caseNames.distinct.length != caseNames.length then
     throw ReadFailure(s"$typeName: duplicate case discriminator names: ${caseNames.mkString(", ")}")
   private lazy val codecs = caseCodecs
@@ -133,11 +154,22 @@ final class FlatSumCodec[T](
     case s: SingletonCodec[?] => s.bodyFieldNames
     case _ => Array.empty
 
+  def sizeOf(value: T): Int =
+    val idx = ordinalOf(value)
+    1 +
+      (codecs(idx) match
+        case s: SizedCodec[Any @unchecked] => s.sizeOf(value)
+        case _ => 0)
+
   def writeObject(out: ObjectOutput, value: T): Unit =
     val idx = ordinalOf(value)
     val _ = guardChecked
+    out.declareSize(sizeOf(value))
     out.writeField(caseFieldName).writeSimple().writeString(caseNames(idx))
-    codecs(idx).asInstanceOf[ObjectCodec[Any]].writeObject(out, value)
+    codecs(idx) match
+      case p: ProductCodec[Any @unchecked] => p.writeFieldsOnly(out, value)
+      case _: SingletonCodec[Any @unchecked] => ()
+      case other => other.asInstanceOf[ObjectCodec[Any]].writeObject(out, value)
 
   def readObject(in: ObjectInput): T = try
     val _ = guardChecked
@@ -163,8 +195,9 @@ final class FlatSumCodec[T](
       codecs(idx).asInstanceOf[ObjectCodec[Any]].readObject(replay).asInstanceOf[T]
   catch case rf: ReadFailure => throw rf.withRootType(typeName)
 
-final class SingletonCodec[T](val value: T) extends ObjectCodec[T]:
+final class SingletonCodec[T](val value: T) extends ObjectCodec[T], SizedCodec[T]:
   private[mcodec] def bodyFieldNames: Array[String] = Array.empty
+  def sizeOf(value: T): Int = 0
   def writeObject(out: ObjectOutput, v: T): Unit = ()
   def readObject(in: ObjectInput): T = value
 

@@ -110,3 +110,44 @@ object InMemoryBackend extends Backend:
     val out = new InMemoryOutput(v => captured = v)
     (out, () => captured)
   def input(repr: Repr): Input = new InMemoryInput(repr)
+
+// JSON declareSize is a no-op; this fixture captures declared sizes so exact element counts are observable.
+final class RecordingOutput(sink: MValue => Unit, record: Int => Unit) extends OutputAndSimpleOutput:
+  def writeNull(): Unit = sink(MNull)
+  def writeString(str: String): Unit = sink(MString(str))
+  def writeBoolean(b: Boolean): Unit = sink(MBool(b))
+  def writeInt(i: Int): Unit = sink(MInt(i))
+  def writeLong(l: Long): Unit = sink(MLong(l))
+  def writeDouble(d: Double): Unit = sink(MDouble(d))
+  def writeBigInt(b: BigInt): Unit = sink(MBigInt(b))
+  def writeBigDecimal(b: BigDecimal): Unit = sink(MBigDecimal(b))
+  def writeList(): ListOutput = new RecordingListOutput(sink, record)
+  def writeObject(): ObjectOutput = new RecordingObjectOutput(sink, record)
+
+final class RecordingListOutput(sink: MValue => Unit, record: Int => Unit) extends ListOutput:
+  private val buffer = Vector.newBuilder[MValue]
+  override def declareSize(size: Int): Unit = record(size)
+  def writeElement(): Output = new RecordingOutput(v => buffer += v, record)
+  def finish(): Unit = sink(MList(buffer.result()))
+
+final class RecordingObjectOutput(sink: MValue => Unit, record: Int => Unit) extends ObjectOutput:
+  private val buffer = Vector.newBuilder[(String, MValue)]
+  override def declareSize(size: Int): Unit = record(size)
+  def writeField(key: String): Output = new RecordingOutput(v => buffer += (key -> v), record)
+  def finish(): Unit = sink(MObj(buffer.result()))
+
+object RecordingBackend extends Backend:
+  type Repr = MValue
+  def output(): (Output, () => Repr) =
+    var captured: MValue = MNull
+    val out = new RecordingOutput(v => captured = v, _ => ())
+    (out, () => captured)
+  def input(repr: Repr): Input = new InMemoryInput(repr)
+
+  /** Encode `value`, returning the encoded value and the declared sizes in write order. */
+  def declaredSizes[T: MCodec](value: T): (MValue, List[Int]) =
+    var captured: MValue = MNull
+    val sizes = List.newBuilder[Int]
+    val out = new RecordingOutput(v => captured = v, n => sizes += n)
+    MCodec.write(out, value)
+    (captured, sizes.result())
