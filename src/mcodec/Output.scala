@@ -5,6 +5,7 @@ trait Output:
   def writeSimple(): SimpleOutput
   def writeList(): ListOutput
   def writeObject(): ObjectOutput
+  def hasMarker(marker: Marker): Boolean = false
 
 trait SimpleOutput:
   def writeString(str: String): Unit
@@ -33,6 +34,7 @@ trait SequentialOutput:
   def finish(): Unit
   def declareSize(size: Int): Unit = ()
   def knownSize: Int = -1
+  def hasMarker(marker: Marker): Boolean = false
 
 trait ListOutput extends SequentialOutput:
   def writeElement(): Output
