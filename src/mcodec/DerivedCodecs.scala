@@ -117,7 +117,7 @@ final class NestedSumCodec[T](
   def readObject(in: ObjectInput): T = try
     if !in.hasNext then
       if defaultCaseIdx >= 0 then defaultRead()
-      else throw ReadFailure(s"$typeName: expected single-field case wrapper, got empty object")
+      else throw new MissingCase(s"$typeName: expected single-field case wrapper, got empty object")
     else
       val f = in.nextField()
       val idx = caseNames.indexOf(f.fieldName)
@@ -131,7 +131,7 @@ final class NestedSumCodec[T](
           withSegment(PathSegment.Case(f.fieldName)):
             codecs(idx).read(f)
           .asInstanceOf[T]
-        if in.hasNext then throw ReadFailure(s"$typeName: expected single-field case wrapper, got extra fields")
+        if in.hasNext then throw new NotSingleField(s"$typeName: expected single-field case wrapper, got extra fields")
         result
   catch case rf: ReadFailure => throw rf.withRootType(typeName)
 
@@ -206,11 +206,9 @@ final class FlatSumCodec[T](
         val i = caseNames.indexOf(cn)
         if i < 0 then defaultCaseIdx else i
     if idx < 0 then
-      throw ReadFailure(
-        caseName match
-          case null => s"$typeName: missing discriminator field '$caseFieldName'"
-          case cn => s"$typeName: unknown case $cn",
-      )
+      caseName match
+        case null => throw new MissingCase(s"$typeName: missing discriminator field '$caseFieldName'")
+        case cn => throw new UnknownCase(s"$typeName: unknown case $cn")
     val replay = new ReplayObjectInput(buf.result())
     withSegment(PathSegment.Case(caseNames(idx))):
       codecs(idx).asInstanceOf[ObjectCodec[Any]].readObject(replay).asInstanceOf[T]
