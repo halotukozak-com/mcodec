@@ -5,3 +5,8 @@
 # scala-cli build artifacts
 .scala-build/
 .bsp/
+scala-doc
+
+# coverage (keep the report generator script)
+.scoverage/*
+!.scoverage/report.sc
