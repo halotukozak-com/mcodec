@@ -75,3 +75,9 @@ class SizedCodecTest extends munit.FunSuite, JsonConv:
   test("@transientDefault omitted field not counted; non-default counted"):
     assertEquals(declaredOf(TDSized(7, "a")), 1)
     assertEquals(declaredOf(TDSized(9, "a")), 2)
+
+  test("force-write marker counts the forced field"):
+    val (_, sizes) = RecordingBackend.declaredSizes(TDSized(7, "a"))(
+      using MCodec.forceTransientDefaults(MCodec[TDSized]),
+    )
+    assertEquals(sizes.head, 2)

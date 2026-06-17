@@ -33,25 +33,28 @@ final class ProductCodec[T](
 
   // Single source of truth for both counting and writing. Structural `==` is the
   // transient-default contract; Array-typed defaults compare by reference (rarely omitted).
-  private def isOmitted(i: Int, p: Product): Boolean =
+  // `forced` (the IgnoreTransientDefaults marker) disables the transient-default omission.
+  private def isOmitted(i: Int, p: Product, forced: Boolean): Boolean =
     ((optionalFlags(i) || isOption(i)) && (p.productElement(i) == None)) ||
-      (transientDefaultFlags(i) && defaults(i).contains(p.productElement(i)))
+      (!forced && transientDefaultFlags(i) && defaults(i).contains(p.productElement(i)))
 
-  def sizeOf(value: T): Int =
+  private[mcodec] def writtenFieldCount(value: T, forced: Boolean): Int =
     val p = value.asInstanceOf[Product]
     var omitted = 0
     var i = 0
     while i < labels.length do
-      if isOmitted(i, p) then omitted += 1
+      if isOmitted(i, p, forced) then omitted += 1
       i += 1
     (labels.length - omitted) + genLabels.length
 
-  private[mcodec] def writeFieldsOnly(out: ObjectOutput, value: T): Unit =
+  def sizeOf(value: T): Int = writtenFieldCount(value, false)
+
+  private[mcodec] def writeFieldsOnly(out: ObjectOutput, value: T, forced: Boolean): Unit =
     val p = value.asInstanceOf[Product]
     var i = 0
     while i < labels.length do
       val v = p.productElement(i)
-      if isOmitted(i, p) then ()
+      if isOmitted(i, p, forced) then ()
       else childCodecs(i).write(out.writeField(labels(i)), v)
       i += 1
     var g = 0
@@ -60,8 +63,9 @@ final class ProductCodec[T](
       g += 1
 
   def writeObject(out: ObjectOutput, value: T): Unit =
-    out.declareSize(sizeOf(value))
-    writeFieldsOnly(out, value)
+    val forced = out.hasMarker(Marker.IgnoreTransientDefaults)
+    out.declareSize(writtenFieldCount(value, forced))
+    writeFieldsOnly(out, value, forced)
 
   def readObject(in: ObjectInput): T = try
     val values = new Array[Any](labels.length)
@@ -165,20 +169,26 @@ final class FlatSumCodec[T](
     case s: SingletonCodec[?] => s.bodyFieldNames
     case _ => Array.empty
 
-  def sizeOf(value: T): Int =
-    val idx = ordinalOf(value)
-    1 +
-      (codecs(idx) match
-        case s: SizedCodec[Any @unchecked] => s.sizeOf(value)
-        case _ => 0)
+  // `forced` (IgnoreTransientDefaults marker) propagates into the product body so its
+  // `@transientDefault` fields are force-written and the declared size still matches.
+  private def bodySize(value: T, forced: Boolean): Int =
+    ordinalOf(value) match
+      case idx =>
+        codecs(idx) match
+          case p: ProductCodec[Any @unchecked] => p.writtenFieldCount(value, forced)
+          case s: SizedCodec[Any @unchecked] => s.sizeOf(value)
+          case _ => 0
+
+  def sizeOf(value: T): Int = 1 + bodySize(value, false)
 
   def writeObject(out: ObjectOutput, value: T): Unit =
     val idx = ordinalOf(value)
     val _ = guardChecked
-    out.declareSize(sizeOf(value))
+    val forced = out.hasMarker(Marker.IgnoreTransientDefaults)
+    out.declareSize(1 + bodySize(value, forced))
     out.writeField(caseFieldName).writeSimple().writeString(caseNames(idx))
     codecs(idx) match
-      case p: ProductCodec[Any @unchecked] => p.writeFieldsOnly(out, value)
+      case p: ProductCodec[Any @unchecked] => p.writeFieldsOnly(out, value, forced)
       case _: SingletonCodec[Any @unchecked] => ()
       case other => other.asInstanceOf[ObjectCodec[Any]].writeObject(out, value)
 

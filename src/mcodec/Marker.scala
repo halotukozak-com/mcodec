@@ -2,6 +2,13 @@ package mcodec
 
 trait Marker
 
+object Marker:
+  /**
+   * Force-write marker: when present on the Output, `@transientDefault` omission is disabled so
+   * every defaulted field is written. GenCodec `IgnoreTransientDefaultMarker` analogue.
+   */
+  case object IgnoreTransientDefaults extends Marker
+
 extension (out: Output)
   def withMarkers(markers: Marker*): Output =
     if markers.isEmpty then out else MarkedOutput(out, markers.toSet)
