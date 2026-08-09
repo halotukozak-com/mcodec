@@ -29,6 +29,10 @@ trait ListCodec[T] extends NullSafeCodec[T]:
     writeList(lo, value)
     lo.finish()
 
+/** A codec able to report the exact number of elements/fields it will write for a value. */
+trait SizedCodec[T]:
+  def sizeOf(value: T): Int
+
 trait ObjectCodec[T] extends NullSafeCodec[T]:
   def readObject(input: ObjectInput): T
   def writeObject(output: ObjectOutput, value: T): Unit

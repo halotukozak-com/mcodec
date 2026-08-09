@@ -44,6 +44,11 @@ final class JsonOutput(sb: java.lang.StringBuilder) extends OutputAndSimpleOutpu
     else sb.append('"').append(d.toString).append('"')
     ()
 
+  override def writeFloat(f: Float): Unit =
+    if java.lang.Float.isFinite(f) then sb.append(f.toString)
+    else sb.append('"').append(f.toString).append('"')
+    ()
+
   def writeBigDecimal(b: BigDecimal): Unit =
     sb.append(b.toString)
     ()

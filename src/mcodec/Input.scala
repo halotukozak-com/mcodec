@@ -1,5 +1,8 @@
 package mcodec
 
+enum InputKind:
+  case Null, String, Boolean, Number, List, Object
+
 trait Input:
   /** Returns true (and consumes the value) if it is null, otherwise returns false and leaves the cursor. */
   def readNull(): Boolean
@@ -9,6 +12,12 @@ trait Input:
   def skip(): Unit
   final def skipValue(): Unit = skip()
 
+  /**
+   * Non-consuming probe of the next value's kind. Default backends that cannot peek throw; backends used for
+   * flat-sum/@outOfOrder capture (JSON, CBOR) override it.
+   */
+  def peekKind(): InputKind = throw ReadFailure("peekKind not supported by this backend")
+
 trait SimpleInput:
   def readString(): String
   def readBoolean(): Boolean
@@ -17,6 +26,29 @@ trait SimpleInput:
   def readDouble(): Double
   def readBigInt(): BigInt
   def readBigDecimal(): BigDecimal
+
+  def readByte(): Byte =
+    val i = readInt()
+    if i >= Byte.MinValue && i <= Byte.MaxValue then i.toByte
+    else throw ReadFailure(s"Int out of Byte range: $i")
+
+  def readShort(): Short =
+    val i = readInt()
+    if i >= Short.MinValue && i <= Short.MaxValue then i.toShort
+    else throw ReadFailure(s"Int out of Short range: $i")
+
+  def readChar(): Char =
+    val s = readString()
+    if s.length == 1 then s.charAt(0)
+    else throw ReadFailure(s"expected single-char string, got length ${s.length}")
+
+  def readFloat(): Float = readDouble().toFloat
+
+  def readTimestamp(): Long = readLong()
+
+  def readBinary(): Array[Byte] =
+    // PLATFORM-SEAM: java.util.Base64 (JVM-only; replace behind a platform seam in cross-build Phase F)
+    java.util.Base64.getDecoder.nn.decode(readString()).nn
 
 trait SequentialInput:
   def hasNext: Boolean

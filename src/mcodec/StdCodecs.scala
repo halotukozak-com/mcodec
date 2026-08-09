@@ -6,8 +6,6 @@ import scala.collection.immutable.HashSet
 import scala.reflect.ClassTag
 
 trait StdCodecs:
-  this: MCodec.type =>
-
   given intCodec: SimpleCodec[Int]:
     def readSimple(in: SimpleInput): Int = in.readInt()
     def writeSimple(out: SimpleOutput, v: Int): Unit = out.writeInt(v)
@@ -41,6 +39,61 @@ trait StdCodecs:
       try ju.UUID.fromString(in.readString())
       catch case e: IllegalArgumentException => throw ReadFailure("invalid UUID", e)
     def writeSimple(out: SimpleOutput, v: ju.UUID): Unit = out.writeString(v.toString)
+
+  given byteCodec: SimpleCodec[Byte]:
+    def readSimple(in: SimpleInput): Byte = in.readByte()
+    def writeSimple(out: SimpleOutput, v: Byte): Unit = out.writeByte(v)
+
+  given shortCodec: SimpleCodec[Short]:
+    def readSimple(in: SimpleInput): Short = in.readShort()
+    def writeSimple(out: SimpleOutput, v: Short): Unit = out.writeShort(v)
+
+  given charCodec: SimpleCodec[Char]:
+    def readSimple(in: SimpleInput): Char = in.readChar()
+    def writeSimple(out: SimpleOutput, v: Char): Unit = out.writeChar(v)
+
+  given floatCodec: SimpleCodec[Float]:
+    def readSimple(in: SimpleInput): Float = in.readFloat()
+    def writeSimple(out: SimpleOutput, v: Float): Unit = out.writeFloat(v)
+
+  // epoch millis; java.sql.Timestamp covered as Date subclass
+  given dateCodec: SimpleCodec[ju.Date]:
+    def readSimple(in: SimpleInput): ju.Date = new ju.Date(in.readTimestamp())
+    def writeSimple(out: SimpleOutput, v: ju.Date): Unit = out.writeTimestamp(v.getTime)
+
+  given byteArrayCodec: SimpleCodec[Array[Byte]]:
+    def readSimple(in: SimpleInput): Array[Byte] = in.readBinary()
+    def writeSimple(out: SimpleOutput, v: Array[Byte]): Unit = out.writeBinary(v)
+
+  given symbolCodec: SimpleCodec[Symbol]:
+    def readSimple(in: SimpleInput): Symbol = Symbol(in.readString())
+    def writeSimple(out: SimpleOutput, v: Symbol): Unit = out.writeString(v.name)
+
+  given unitCodec: MCodec[Unit] = MCodec.create(
+    in => if in.readNull() then () else throw ReadFailure("expected null for Unit"),
+    (out, _) => out.writeNull(),
+  )
+
+  given nullCodec: MCodec[Null] = MCodec.create(
+    in =>
+      in.readNull()
+      null
+    ,
+    (out, _) => out.writeNull(),
+  )
+
+  given voidCodec: MCodec[Void | Null] = MCodec.create(
+    in =>
+      in.readNull()
+      null
+    ,
+    (out, _) => out.writeNull(),
+  )
+
+  given nothingCodec: MCodec[Nothing] = MCodec.create(
+    _ => throw ReadFailure("cannot read a Nothing value"),
+    (_, _) => throw WriteFailure("cannot write a Nothing value"),
+  )
 
   given optionCodec: [T: MCodec] => MCodec[Option[T]]:
     def write(out: Output, value: Option[T]): Unit = value match
@@ -80,6 +133,7 @@ trait StdCodecs:
 
   private class CollectionCodec[C[X] <: Iterable[X], T: MCodec](using fac: Factory[T, C[T]]) extends ListCodec[C[T]]:
     def writeList(out: ListOutput, value: C[T]): Unit =
+      out.declareSize(value.size)
       value.foreach(MCodec.write(out.writeElement(), _))
     def readList(in: ListInput): C[T] =
       val b = fac.newBuilder
@@ -98,6 +152,7 @@ trait StdCodecs:
 
   given arrayCodec: [T: {ClassTag, MCodec}] => ListCodec[Array[T]]:
     def writeList(out: ListOutput, value: Array[T]): Unit =
+      out.declareSize(value.length)
       var i = 0
       while i < value.length do
         MCodec.write(out.writeElement(), value(i))
@@ -111,8 +166,10 @@ trait StdCodecs:
       b.result()
 
   protected class ObjectMapCodec[K: MKeyCodec as keyCodec, V: MCodec] extends ObjectCodec[Map[K, V]]:
-    def writeObject(out: ObjectOutput, m: Map[K, V]): Unit = m.foreach: (key, value) =>
-      MCodec.write(out.writeField(keyCodec.writeKey(key)), value)
+    def writeObject(out: ObjectOutput, m: Map[K, V]): Unit =
+      out.declareSize(m.size)
+      m.foreach: (key, value) =>
+        MCodec.write(out.writeField(keyCodec.writeKey(key)), value)
     def readObject(in: ObjectInput): Map[K, V] =
       val b = Map.newBuilder[K, V]
       while in.hasNext do
@@ -121,11 +178,13 @@ trait StdCodecs:
       b.result()
 
   protected class PairsMapCodec[K: MCodec, V: MCodec] extends ListCodec[Map[K, V]]:
-    def writeList(out: ListOutput, m: Map[K, V]): Unit = m.foreach: (key, value) =>
-      val pair = out.writeElement().writeList()
-      MCodec.write(pair.writeElement(), key)
-      MCodec.write(pair.writeElement(), value)
-      pair.finish()
+    def writeList(out: ListOutput, m: Map[K, V]): Unit =
+      out.declareSize(m.size)
+      m.foreach: (key, value) =>
+        val pair = out.writeElement().writeList()
+        MCodec.write(pair.writeElement(), key)
+        MCodec.write(pair.writeElement(), value)
+        pair.finish()
     def readList(in: ListInput): Map[K, V] =
       val b = Map.newBuilder[K, V]
       var entryIdx = 0

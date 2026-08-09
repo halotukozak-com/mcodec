@@ -28,7 +28,7 @@ trait MCodec[T]:
       case null => output.writeNull()
       case v => self.write(output, v)
 
-object MCodec extends StdCodecs, Derivation:
+object MCodec extends StdCodecs, ManualCodecs, JavaCodecs, Derivation:
   inline def apply[T: MCodec as c]: MCodec[T] = c
 
   transparent inline def derived[T](using m: Made.Of[T]): MCodec[T] = derivedRec[T]
@@ -44,3 +44,13 @@ object MCodec extends StdCodecs, Derivation:
     private lazy val c = codec
     def read(input: Input): T = c.read(input)
     def write(output: Output, value: T): Unit = c.write(output, value)
+
+  /**
+   * Force-write variant: writes every `@transientDefault` field even when equal to its default.
+   * Implemented via the `IgnoreTransientDefaults` Output marker, so it works for ANY codec and
+   * recurses into nested products. Read is unchanged.
+   */
+  def forceTransientDefaults[T](codec: MCodec[T]): MCodec[T] = new:
+    def read(input: Input): T = codec.read(input)
+    def write(output: Output, value: T): Unit =
+      codec.write(output.withMarkers(Marker.IgnoreTransientDefaults), value)

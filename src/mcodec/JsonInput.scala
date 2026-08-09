@@ -166,6 +166,10 @@ class JsonInput(reader: JsonReader) extends InputAndSimpleInput:
 
   def readDouble(): Double = reader.readRawNumber().toDouble
 
+  override def readFloat(): Float =
+    if reader.peekToken == JsonToken.Str then reader.readRawString().toFloat
+    else reader.readRawNumber().toFloat
+
   def readBigInt(): BigInt = BigInt(stripWholeFraction(reader.readRawNumber()))
 
   def readBigDecimal(): BigDecimal = BigDecimal(reader.readRawNumber())
@@ -178,6 +182,13 @@ class JsonInput(reader: JsonReader) extends InputAndSimpleInput:
 
   private[mcodec] def peekToken: JsonToken = reader.peekToken
   private[mcodec] def rawNumber(): String = reader.readRawNumber()
+
+  override def peekKind(): InputKind = reader.peekToken match
+    case JsonToken.Obj => InputKind.Object
+    case JsonToken.Arr => InputKind.List
+    case JsonToken.Str => InputKind.String
+    case JsonToken.Bool => InputKind.Boolean
+    case JsonToken.Num => InputKind.Number
 
   private def parseIntLexeme(lex: String): Int =
     try Integer.parseInt(lex)
