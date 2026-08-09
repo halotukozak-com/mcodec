@@ -45,9 +45,11 @@ object MCodec extends StdCodecs, ManualCodecs, JavaCodecs, Derivation:
     def read(input: Input): T = c.read(input)
     def write(output: Output, value: T): Unit = c.write(output, value)
 
-  /** Force-write variant: writes every `@transientDefault` field even when equal to its default.
-    * Implemented via the `IgnoreTransientDefaults` Output marker, so it works for ANY codec and
-    * recurses into nested products. Read is unchanged. */
+  /**
+   * Force-write variant: writes every `@transientDefault` field even when equal to its default.
+   * Implemented via the `IgnoreTransientDefaults` Output marker, so it works for ANY codec and
+   * recurses into nested products. Read is unchanged.
+   */
   def forceTransientDefaults[T](codec: MCodec[T]): MCodec[T] = new:
     def read(input: Input): T = codec.read(input)
     def write(output: Output, value: T): Unit =

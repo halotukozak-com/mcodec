@@ -1,6 +1,5 @@
 package mcodec
 
-
 object MarkerFixtures:
   object MarkerA extends Marker
   object MarkerB extends Marker
