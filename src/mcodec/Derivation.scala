@@ -62,7 +62,7 @@ trait Derivation:
         compiletime.constValueTuple[m.ElemLabels].toArrayOf[String],
         summonOrDeriveCases[m.ElemTypes].toArray,
         m.ordinal,
-        m.getAnnotation[mcodec.annotation.flatten].fold("_case")(_.key),
+        Option(m.getAnnotation[mcodec.annotation.flatten]).fold("_case")(_.key),
         defaultCaseIdx(m.elems.hasAnnotations[mcodec.annotation.defaultCase]),
       )
     else
