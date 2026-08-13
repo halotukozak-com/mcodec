@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 // Test-only in-memory Input/Output fixture proving the Plan-01 contract.
 // NOT shipped library API. The real backend is JSON.

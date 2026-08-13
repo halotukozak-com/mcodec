@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 final class Deferred[T] extends MCodec[T]:
   private[mcodec] var underlying: MCodec[T] | Null = compiletime.uninitialized

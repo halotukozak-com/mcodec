@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 private def writeJsonString(sb: java.lang.StringBuilder, s: String): Unit =
   sb.append('"')

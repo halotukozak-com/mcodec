@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 object CborBackend extends Backend:
   type Repr = Array[Byte]

@@ -1,6 +1,6 @@
-package mcodec
+package halotukozak.mcodec
 
-import mcodec.MKeyCodec.given
+import halotukozak.mcodec.MKeyCodec.given
 
 class CborFormatTest extends munit.FunSuite, CborConv:
 

@@ -1,6 +1,6 @@
-package mcodec
+package halotukozak.mcodec
 
-import mcodec.MValue.*
+import halotukozak.mcodec.MValue.*
 import org.scalacheck.{Arbitrary, Gen}
 
 import java.lang as jl

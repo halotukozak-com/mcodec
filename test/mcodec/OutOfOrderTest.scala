@@ -1,6 +1,6 @@
-package mcodec
+package halotukozak.mcodec
 
-import mcodec.annotation.outOfOrder
+import halotukozak.mcodec.annotation.outOfOrder
 
 object OutOfOrderFixtures:
   case class OOO(@outOfOrder tag: String, value: Int) derives MCodec

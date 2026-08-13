@@ -1,6 +1,6 @@
-package mcodec
+package halotukozak.mcodec
 
-import mcodec.annotation.{defaultCase, flatten}
+import halotukozak.mcodec.annotation.{defaultCase, flatten}
 import scala.compiletime.testing.typeCheckErrors
 
 enum NestedCmd derives MCodec:
@@ -32,8 +32,8 @@ class DefaultCaseTest extends munit.FunSuite, JsonConv:
 
   test("more than one @defaultCase is rejected at compile time"):
     val errs = typeCheckErrors("""
-      import mcodec.*
-      import mcodec.annotation.{flatten, defaultCase}
+      import halotukozak.mcodec.*
+      import halotukozak.mcodec.annotation.{flatten, defaultCase}
       @flatten enum TwoDefaults derives MCodec:
         @defaultCase case A
         @defaultCase case B

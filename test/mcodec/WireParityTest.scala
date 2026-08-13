@@ -1,6 +1,6 @@
-package mcodec
+package halotukozak.mcodec
 
-import mcodec.MKeyCodec.given
+import halotukozak.mcodec.MKeyCodec.given
 
 final case class WireCase[T](value: T, json: String, cbor: String)(using val codec: MCodec[T])
 

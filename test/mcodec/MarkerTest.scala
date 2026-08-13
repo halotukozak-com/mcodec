@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 object MarkerFixtures:
   object MarkerA extends Marker

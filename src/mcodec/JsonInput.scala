@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 enum JsonToken:
   case Obj, Arr, Str, Bool, Num

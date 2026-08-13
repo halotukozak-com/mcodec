@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 object JsonBackend extends Backend:
   type Repr = String

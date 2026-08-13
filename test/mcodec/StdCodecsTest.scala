@@ -1,7 +1,7 @@
-package mcodec
+package halotukozak.mcodec
 
-import mcodec.MKeyCodec.given
-import mcodec.MValue.*
+import halotukozak.mcodec.MKeyCodec.given
+import halotukozak.mcodec.MValue.*
 import org.scalacheck.{Arbitrary, Gen}
 
 class StdCodecsTest extends RoundTrip(InMemoryBackend), JsonConv:
