@@ -1,6 +1,6 @@
 package mcodec
 
-import made.annotation.transparent
+import halotukozak.made.annotation.transparent
 
 class TransparentAnnotTest extends munit.FunSuite, JsonConv:
   @transparent case class Email(value: String) derives MCodec

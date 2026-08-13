@@ -1,3 +1,3 @@
 package mcodec.annotation
 
-class transientDefault extends made.annotation.MetaAnnotation
+class transientDefault extends halotukozak.made.annotation.MetaAnnotation

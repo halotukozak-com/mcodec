@@ -1,8 +1,8 @@
 package mcodec
 
-import made.*
-import made.annotation.optionalParam
-import commons.*
+import halotukozak.made.*
+import halotukozak.made.annotation.optionalParam
+import halotukozak.commons.*
 
 trait Derivation:
   this: MCodec.type =>
