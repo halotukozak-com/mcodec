@@ -1,3 +1,3 @@
-package mcodec.annotation
+package halotukozak.mcodec.annotation
 
-class stringEnum extends made.annotation.MetaAnnotation
+class stringEnum extends halotukozak.made.annotation.MetaAnnotation

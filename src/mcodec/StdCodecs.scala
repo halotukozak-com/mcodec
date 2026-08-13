@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 import java.util as ju
 import scala.collection.Factory

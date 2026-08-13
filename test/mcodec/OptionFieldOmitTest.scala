@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 class OptionFieldOmitTest extends munit.FunSuite, JsonConv:
 

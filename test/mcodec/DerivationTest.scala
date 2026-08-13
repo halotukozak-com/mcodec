@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary

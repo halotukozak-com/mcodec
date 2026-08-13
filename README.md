@@ -52,7 +52,7 @@ def mvDeps = Seq(mvn"io.github.halotukozak::mcodec::<version>")
 Derive an `MCodec` for a case class and round-trip it through JSON.
 
 ```scala
-import mcodec.*
+import halotukozak.mcodec.*
 
 case class User(name: String, age: Int) derives MCodec
 
@@ -63,7 +63,7 @@ val user = Json.read[User](json) // User("Alice", 30)
 Rename fields and ADT cases on the wire with `@name`:
 
 ```scala
-import mcodec.*
+import halotukozak.mcodec.*
 import made.annotation.name
 
 case class User(@name("user_name") name: String, age: Int) derives MCodec
@@ -78,7 +78,7 @@ Json.write[Shape](Shape.Circle(2.0)) // {"circ":{"radius":2.0}}
 Build codecs from existing ones with the combinators on `MCodec`:
 
 ```scala
-import mcodec.*
+import halotukozak.mcodec.*
 
 opaque type Email = String
 given MCodec[Email] = MCodec[String].transform(identity, identity)

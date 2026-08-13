@@ -1,6 +1,6 @@
-package mcodec
+package halotukozak.mcodec
 
-import mcodec.annotation.stringEnum
+import halotukozak.mcodec.annotation.stringEnum
 
 object EnumStringFixtures:
   @stringEnum enum Color derives MCodec:

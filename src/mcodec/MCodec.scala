@@ -1,6 +1,6 @@
-package mcodec
+package halotukozak.mcodec
 
-import made.*
+import halotukozak.made.*
 
 trait MCodec[T]:
   self =>

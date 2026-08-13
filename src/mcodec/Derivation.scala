@@ -1,7 +1,8 @@
-package mcodec
+package halotukozak.mcodec
 
-import made.*
-import made.annotation.optionalParam
+import halotukozak.made.*
+import halotukozak.made.annotation.optionalParam
+import halotukozak.commons.*
 
 trait Derivation:
   this: MCodec.type =>
@@ -27,8 +28,8 @@ trait Derivation:
       .toArrayOf[Option[Any]],
     m.elems.hasAnnotations[optionalParam].toArrayOf[Boolean],
     isOptionFlags[m.ElemTypes].toArray,
-    m.elems.hasAnnotations[mcodec.annotation.transientDefault].toArrayOf[Boolean],
-    m.elems.hasAnnotations[mcodec.annotation.outOfOrder].toArrayOf[Boolean],
+    m.elems.hasAnnotations[halotukozak.mcodec.annotation.transientDefault].toArrayOf[Boolean],
+    m.elems.hasAnnotations[halotukozak.mcodec.annotation.outOfOrder].toArrayOf[Boolean],
     m.fromUnsafeArray,
     compiletime
       .constValueTuple[Tuple.Map[m.GeneratedElems, MadeElem.ExtractLabel]]
@@ -49,21 +50,21 @@ trait Derivation:
     case _: (head *: tail) => false :: isOptionFlags[tail]
 
   inline def deriveSum[T](m: Made.SumOf[T]): MCodec[T] =
-    inline if m.hasAnnotation[mcodec.annotation.stringEnum] then
+    inline if m.hasAnnotation[halotukozak.mcodec.annotation.stringEnum] then
       EnumStringCodec[T](
         compiletime.constValue[m.Label],
         compiletime.constValueTuple[m.ElemLabels].toArrayOf[String],
         summonOrDeriveCases[m.ElemTypes].toArray,
         m.ordinal,
       )
-    else inline if m.hasAnnotation[mcodec.annotation.flatten] then
+    else inline if m.hasAnnotation[halotukozak.mcodec.annotation.flatten] then
       FlatSumCodec[T](
         compiletime.constValue[m.Label],
         compiletime.constValueTuple[m.ElemLabels].toArrayOf[String],
         summonOrDeriveCases[m.ElemTypes].toArray,
         m.ordinal,
-        Option(m.getAnnotation[mcodec.annotation.flatten]).fold("_case")(_.key),
-        defaultCaseIdx(m.elems.hasAnnotations[mcodec.annotation.defaultCase]),
+        Option(m.getAnnotation[halotukozak.mcodec.annotation.flatten]).fold("_case")(_.key),
+        defaultCaseIdx(m.elems.hasAnnotations[halotukozak.mcodec.annotation.defaultCase]),
       )
     else
       NestedSumCodec[T](
@@ -71,7 +72,7 @@ trait Derivation:
         compiletime.constValueTuple[m.ElemLabels].toArrayOf[String],
         summonOrDeriveCases[m.ElemTypes].toArray,
         m.ordinal,
-        defaultCaseIdx(m.elems.hasAnnotations[mcodec.annotation.defaultCase]),
+        defaultCaseIdx(m.elems.hasAnnotations[halotukozak.mcodec.annotation.defaultCase]),
       )
 
   inline def forSealedEnum[T: Made.Of as m]: MCodec[T] = inline m match

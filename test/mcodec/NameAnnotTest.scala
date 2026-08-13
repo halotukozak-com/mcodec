@@ -1,6 +1,6 @@
-package mcodec
+package halotukozak.mcodec
 
-import made.annotation.name
+import halotukozak.made.annotation.name
 
 class NameAnnotTest extends munit.FunSuite, JsonConv:
   case class User(@name("user_name") name: String, age: Int) derives MCodec

@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 class DerivationCacheTest extends munit.FunSuite:
   case class Person(name: String, age: Int) derives MCodec

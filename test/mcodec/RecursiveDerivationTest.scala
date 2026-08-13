@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 class RecursiveDerivationTest extends munit.FunSuite:
   case class Tree(value: Int, children: List[Tree]) derives MCodec

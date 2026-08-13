@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 import java.lang as jl
 import java.math as jm

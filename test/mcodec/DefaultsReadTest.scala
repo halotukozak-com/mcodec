@@ -1,6 +1,6 @@
-package mcodec
+package halotukozak.mcodec
 
-import made.annotation.whenAbsent
+import halotukozak.made.annotation.whenAbsent
 
 class DefaultsReadTest extends munit.FunSuite, JsonConv:
 

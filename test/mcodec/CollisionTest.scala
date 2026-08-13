@@ -1,12 +1,12 @@
-package mcodec
+package halotukozak.mcodec
 
 import scala.compiletime.testing.typeCheckErrors
 
 class CollisionTest extends munit.FunSuite:
   test("duplicate @name on sibling fields is rejected at compile time"):
     val errs = typeCheckErrors("""
-      import mcodec.*
-      import made.annotation.name
+      import halotukozak.mcodec.*
+      import halotukozak.made.annotation.name
       case class Bad(@name("x") a: Int, @name("x") b: Int) derives MCodec
     """)
     assert(errs.nonEmpty, "expected a compile error for duplicate @name")

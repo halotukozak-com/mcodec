@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 // Backend-agnostic, fully-materialised snapshot of an Input value, used by FlatSumCodec
 // to buffer a flat object's fields and replay them (in any order) into the selected case

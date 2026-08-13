@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 enum InputKind:
   case Null, String, Boolean, Number, List, Object
