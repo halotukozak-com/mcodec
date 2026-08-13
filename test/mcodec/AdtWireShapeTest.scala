@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 class AdtWireShapeTest extends munit.FunSuite, JsonConv:
   enum Shape derives MCodec:

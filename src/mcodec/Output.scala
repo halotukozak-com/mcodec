@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 trait Output:
   def writeNull(): Unit

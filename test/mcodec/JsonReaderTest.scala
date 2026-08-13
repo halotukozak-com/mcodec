@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 class JsonReaderTest extends munit.FunSuite:
 

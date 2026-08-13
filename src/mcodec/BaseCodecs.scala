@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 trait NullSafeCodec[T] extends MCodec[T]:
   def readNonNull(input: Input): T

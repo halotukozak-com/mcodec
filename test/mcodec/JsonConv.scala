@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 trait JsonConv:
   extension (x: Any) def toJson[T >: x.type: MCodec]: String = Json.write[T](x)

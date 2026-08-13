@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 object Json:
   def read[T: MCodec as codec](s: String): T =

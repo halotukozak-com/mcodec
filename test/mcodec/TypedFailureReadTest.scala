@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 object TypedFailureReadFixtures:
   case class P(n: Int) derives MCodec

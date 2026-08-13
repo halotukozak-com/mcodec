@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 object SubclassCodecFixtures:
   sealed trait Animal derives MCodec

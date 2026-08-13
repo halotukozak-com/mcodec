@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 class NullableTest extends munit.FunSuite, JsonConv:
   given MCodec[String | Null] = MCodec[String].nullable

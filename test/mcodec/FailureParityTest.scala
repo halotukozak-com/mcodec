@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 object FailureParityFixtures:
   case class Point(x: Int, y: Int) derives MCodec

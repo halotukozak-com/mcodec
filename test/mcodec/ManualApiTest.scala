@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 class ManualApiTest extends munit.FunSuite, JsonConv:
 
@@ -65,7 +65,7 @@ class ManualApiTest extends munit.FunSuite, JsonConv:
     assertEquals(fromJson[Wrap]("\"5\""), Wrap(5))
 
   test("fromKeyCodec serializes value as the QUOTED key string"):
-    import mcodec.MKeyCodec.given
+    import halotukozak.mcodec.MKeyCodec.given
     val c = MCodec.fromKeyCodec[Int]
     // intCodec would write `7` (bare number); fromKeyCodec writes "7" (a string)
     assertEquals(emitJson(c, 7), "\"7\"")

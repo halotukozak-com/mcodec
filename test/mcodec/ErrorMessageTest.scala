@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 object ErrorMessageFixtures:
   case class Address(zip: Int) derives MCodec
