@@ -10,7 +10,7 @@
 //> using options -Yexplicit-nulls
 // //> using options -Wsafe-init -Werror -Wunused:all
 
-//> using publish.organization io.github.halotukozak
+//> using publish.organization com.halotukozak
 //> using publish.name mcodec
 //> using publish.computeVersion git:tag
 //> using publish.description "mcodec - GenCodec-style serialization for Scala 3, built on Made"

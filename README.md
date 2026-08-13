@@ -24,27 +24,27 @@ collections (`List`, `Vector`, `Seq`, `Set`, `Map`).
 ## Installation
 
 > mcodec has not had its first release yet. The coordinates below are how it will be published to Maven Central under
-> `io.github.halotukozak` once tagged. Until then, build from source (see [Build](#build)).
+> `com.halotukozak` once tagged. Until then, build from source (see [Build](#build)).
 
 ### scala-cli
 
 ```scala
 //> using scala 3.8.4
-//> using dep io.github.halotukozak::mcodec::<version>
+//> using dep com.halotukozak::mcodec::<version>
 ```
 
 ### sbt
 
 ```scala
 scalaVersion := "3.8.4"
-libraryDependencies += "io.github.halotukozak" %% "mcodec" % "<version>"
+libraryDependencies += "com.halotukozak" %% "mcodec" % "<version>"
 ```
 
 ### mill
 
 ```scala
 def scalaVersion = "3.8.4"
-def mvDeps = Seq(mvn"io.github.halotukozak::mcodec::<version>")
+def mvDeps = Seq(mvn"com.halotukozak::mcodec::<version>")
 ```
 
 ## Quickstart
