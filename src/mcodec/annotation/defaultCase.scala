@@ -1,3 +1,3 @@
 package halotukozak.mcodec.annotation
 
-class defaultCase extends made.annotation.MetaAnnotation
+class defaultCase extends halotukozak.made.annotation.MetaAnnotation

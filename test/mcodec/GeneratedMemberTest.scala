@@ -1,6 +1,6 @@
 package halotukozak.mcodec
 
-import made.annotation.{generated, name}
+import halotukozak.made.annotation.{generated, name}
 
 case class WithGen(x: Int) derives MCodec:
   @generated def doubled: Int = x * 2

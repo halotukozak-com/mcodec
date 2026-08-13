@@ -1,7 +1,7 @@
 package halotukozak.mcodec
 
-import made.*
-import made.annotation.name
+import halotukozak.made.*
+import halotukozak.made.annotation.name
 
 class MirrorAdapterTest extends munit.FunSuite:
   case class User(@name("user_name") name: String, age: Int = 18)

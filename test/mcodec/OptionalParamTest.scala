@@ -1,6 +1,6 @@
 package halotukozak.mcodec
 
-import made.annotation.optionalParam
+import halotukozak.made.annotation.optionalParam
 
 class OptionalParamTest extends munit.FunSuite, JsonConv:
 

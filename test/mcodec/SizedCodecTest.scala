@@ -1,6 +1,6 @@
 package halotukozak.mcodec
 
-import made.annotation.{generated, optionalParam}
+import halotukozak.made.annotation.{generated, optionalParam}
 import halotukozak.mcodec.annotation.transientDefault
 
 case class TDSized(@transientDefault x: Int = 7, keep: String) derives MCodec
