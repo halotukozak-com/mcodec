@@ -2,6 +2,7 @@ package mcodec
 
 import made.*
 import made.annotation.optionalParam
+import commons.*
 
 trait Derivation:
   this: MCodec.type =>
