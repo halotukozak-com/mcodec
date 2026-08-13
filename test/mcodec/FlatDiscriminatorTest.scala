@@ -1,6 +1,6 @@
-package mcodec
+package halotukozak.mcodec
 
-import mcodec.annotation.flatten
+import halotukozak.mcodec.annotation.flatten
 import org.scalacheck.{Arbitrary, Gen}
 
 @flatten enum FlatShape derives MCodec:

@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 // Test-only wrapper for byte-string fixtures (Array[Byte] has no structural equals; compare via Arrays.equals).
 final class Bytes(val bytes: Array[Byte]):

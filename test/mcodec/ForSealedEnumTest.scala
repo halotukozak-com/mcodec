@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 object ForSealedEnumFixtures:
   // Un-annotated: its derived `given` is the default nested-object codec.

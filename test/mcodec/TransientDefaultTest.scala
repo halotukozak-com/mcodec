@@ -1,6 +1,6 @@
-package mcodec
+package halotukozak.mcodec
 
-import mcodec.annotation.transientDefault
+import halotukozak.mcodec.annotation.transientDefault
 
 object TransientDefaultFixtures:
   case class TD(@transientDefault x: Int = 7, keep: String) derives MCodec

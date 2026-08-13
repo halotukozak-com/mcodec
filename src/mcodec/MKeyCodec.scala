@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 trait MKeyCodec[K]:
   def writeKey(key: K): String
