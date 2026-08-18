@@ -79,14 +79,9 @@ class IoContractExtTest extends munit.FunSuite:
       val s = jsonHarvest(_.writeFloat(f))
       assertEquals(jsonRead(s)(_.readFloat()), f)
 
-  test("Float JSON does not drift through Double for 1.1f"):
-    val s = jsonHarvest(_.writeFloat(1.1f))
-    assertEquals(jsonRead(s)(_.readFloat()), 1.1f)
-    assert(!s.contains("1.100000023"), s"Float drifted through Double: $s")
-
-  test("Float -0.0f preserves sign bit"):
-    val back = jsonRead(jsonHarvest(_.writeFloat(-0.0f)))(_.readFloat())
-    assertEquals(java.lang.Float.floatToIntBits(back), java.lang.Float.floatToIntBits(-0.0f))
+  // Float bit-fidelity tests (drift through Double, -0.0 sign bit) live in
+  // IoContractExtJvmOnlyTest.scala — Scala.js represents Float as Double under
+  // the hood and doesn't preserve either property.
 
   test("Float NaN/Infinity write quoted in JSON and round-trip"):
     val nan = jsonRead(jsonHarvest(_.writeFloat(Float.NaN)))(_.readFloat())

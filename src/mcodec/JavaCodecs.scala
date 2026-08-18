@@ -4,7 +4,6 @@ import java.lang as jl
 import java.math as jm
 import java.util as ju
 import scala.jdk.CollectionConverters.*
-import scala.reflect.{classTag, ClassTag}
 
 trait JavaCodecs:
   this: MCodec.type =>
@@ -124,9 +123,3 @@ trait JavaCodecs:
         val f = in.nextField()
         b.put(kc.readKey(f.fieldName), withSegment(PathSegment.Key(f.fieldName))(MCodec.read[V](f)))
       b.result()
-
-  // The Class[E] cast is the standard reflect idiom for Java enum reflection, not a null cast.
-  given jEnumCodec: [E <: jl.Enum[E]: ClassTag] => MCodec[E] = nonNullString(
-    name => jl.Enum.valueOf(classTag[E].runtimeClass.asInstanceOf[Class[E]], name),
-    _.name.nn,
-  )
