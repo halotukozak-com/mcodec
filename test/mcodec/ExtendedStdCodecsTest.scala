@@ -137,25 +137,16 @@ class ExtendedStdCodecsTest extends RoundTrip(InMemoryBackend), JsonConv:
     assertEquals(MCodec[jl.Integer | Null].read(InMemoryBackend.input(MNull)), null)
     assertEquals(emit[jl.Integer | Null](null), MNull)
 
-  // ===== Java collections / maps / enums via JFactory =====
-  test("Java enum (TimeUnit) round-trips as its name"):
-    assertEquals(
-      MCodec[ju.concurrent.TimeUnit].read(InMemoryBackend.input(emit(ju.concurrent.TimeUnit.SECONDS))),
-      ju.concurrent.TimeUnit.SECONDS,
-    )
-    assertEquals(emit(ju.concurrent.TimeUnit.SECONDS), MString("SECONDS"))
-    assertEquals(ju.concurrent.TimeUnit.SECONDS.toJson[ju.concurrent.TimeUnit], "\"SECONDS\"")
-
+  // ===== Java collections / maps via JFactory =====
+  // (Java enum codec is tested separately in JavaEnumCodecTest.scala — JVM-only.)
   test("java.util.ArrayList round-trips as a list"):
     val al = ju.ArrayList[Int]()
     al.add(1); al.add(2)
     assertEquals(MCodec[ju.ArrayList[Int]].read(InMemoryBackend.input(emit(al))), al)
     assertEquals(emit(al), MList(Vector(MInt(1), MInt(2))))
 
-  test("java.util.HashSet round-trips"):
-    val hs = ju.HashSet[Int]()
-    hs.add(1); hs.add(2)
-    assertEquals(MCodec[ju.HashSet[Int]].read(InMemoryBackend.input(emit(hs))), hs)
+  // java.util.HashSet[Int] round-trip is tested separately in
+  // JavaHashSetIntTest.scala — it crashes the Scala Native runtime.
 
   test("java.util.HashMap round-trips as an object"):
     val hm = ju.HashMap[String, Int]()

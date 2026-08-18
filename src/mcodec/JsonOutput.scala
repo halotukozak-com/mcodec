@@ -1,5 +1,10 @@
 package halotukozak.mcodec
 
+// Double/Float#toString renders whole numbers as "2.0" on the JVM but "2" on Scala.js;
+// this keeps the JSON output identical across platforms (and recognizably floating-point).
+private def numberString(s: String): String =
+  if s.contains('.') || s.contains('e') || s.contains('E') then s else s + ".0"
+
 private def writeJsonString(sb: java.lang.StringBuilder, s: String): Unit =
   sb.append('"')
   var i = 0
@@ -40,12 +45,12 @@ final class JsonOutput(sb: java.lang.StringBuilder) extends OutputAndSimpleOutpu
     sb.append(b.toString)
 
   def writeDouble(d: Double): Unit =
-    if java.lang.Double.isFinite(d) then sb.append(d.toString)
+    if java.lang.Double.isFinite(d) then sb.append(numberString(d.toString))
     else sb.append('"').append(d.toString).append('"')
     ()
 
   override def writeFloat(f: Float): Unit =
-    if java.lang.Float.isFinite(f) then sb.append(f.toString)
+    if java.lang.Float.isFinite(f) then sb.append(numberString(f.toString))
     else sb.append('"').append(f.toString).append('"')
     ()
 
