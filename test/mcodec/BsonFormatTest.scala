@@ -1,6 +1,6 @@
-package mcodec
+package halotukozak.mcodec
 
-import mcodec.MKeyCodec.given
+import halotukozak.mcodec.MKeyCodec.given
 
 case class BsonWrap[T](v: T) derives MCodec
 case class Point(x: Int, y: Int) derives MCodec

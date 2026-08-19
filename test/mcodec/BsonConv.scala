@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 trait BsonConv:
   private def hex(bytes: Array[Byte]): String =

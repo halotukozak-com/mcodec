@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 /**
  * Manual codecs for BSON-native types with no natural JSON/CBOR representation. Each detects

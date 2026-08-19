@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 final class BsonReader(bytes: Array[Byte]):
   private var pos = 0

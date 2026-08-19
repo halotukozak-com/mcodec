@@ -1,7 +1,7 @@
-package mcodec
+package halotukozak.mcodec
 
 import org.scalacheck.{Arbitrary, Gen}
-import mcodec.MKeyCodec.given
+import halotukozak.mcodec.MKeyCodec.given
 
 // Only object-shaped root types are exercised here: BSON requires a document at the top level
 // (see BsonFormatTest "BS1"), unlike JSON/CBOR which admit any T at the root.

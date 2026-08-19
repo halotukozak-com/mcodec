@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 /** A 12-byte MongoDB ObjectId. BSON-native (type 0x07); falls back to a 24-char hex string elsewhere. */
 final class ObjectId private (val bytes: Array[Byte]) extends AnyVal:

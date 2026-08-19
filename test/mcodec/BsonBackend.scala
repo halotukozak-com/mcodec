@@ -1,4 +1,4 @@
-package mcodec
+package halotukozak.mcodec
 
 object BsonBackend extends Backend:
   type Repr = Array[Byte]
