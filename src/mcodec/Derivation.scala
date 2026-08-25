@@ -24,8 +24,8 @@ trait Derivation:
     compiletime.constValueTuple[m.ElemLabels].toArrayOf[String],
     compiletime.summonAll[Tuple.Map[m.ElemTypes, MCodec]].toArrayOf[MCodec[Any]](using containsOnly.refl),
     m.elems
-      .mapAs[MadeFieldElem][[e] =>> Option[Any]]([e <: MadeFieldElem] => elem => elem.default)
-      .toArrayOf[Option[Any]],
+      .mapAs[MadeFieldElem][[e] =>> Any | NotExists]([e <: MadeFieldElem] => elem => elem.default)
+      .toArrayOf[Any | NotExists],
     m.elems.hasAnnotations[optionalParam].toArrayOf[Boolean],
     isOptionFlags[m.ElemTypes].toArray,
     m.elems.hasAnnotations[halotukozak.mcodec.annotation.transientDefault].toArrayOf[Boolean],

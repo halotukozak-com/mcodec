@@ -1,5 +1,7 @@
 package halotukozak.mcodec
 
+import halotukozak.made.NotExists
+
 final class Deferred[T] extends MCodec[T]:
   private[mcodec] var underlying: MCodec[T] | Null = compiletime.uninitialized
 
@@ -15,7 +17,7 @@ final class ProductCodec[T](
   typeName: String,
   labels: Array[String],
   childCodecsByName: => Array[MCodec[Any]],
-  defaults: Array[Option[Any]],
+  defaults: Array[Any | NotExists],
   optionalFlags: Array[Boolean],
   isOption: Array[Boolean],
   transientDefaultFlags: Array[Boolean],
@@ -36,7 +38,7 @@ final class ProductCodec[T](
   // `forced` (the IgnoreTransientDefaults marker) disables the transient-default omission.
   private def isOmitted(i: Int, p: Product, forced: Boolean): Boolean =
     ((optionalFlags(i) || isOption(i)) && (p.productElement(i) == None)) ||
-      (!forced && transientDefaultFlags(i) && defaults(i).contains(p.productElement(i)))
+      (!forced && transientDefaultFlags(i) && defaults(i) != null && defaults(i) == p.productElement(i))
 
   private[mcodec] def writtenFieldCount(value: T, forced: Boolean): Int =
     val p = value.asInstanceOf[Product]
@@ -88,10 +90,10 @@ final class ProductCodec[T](
     while i < labels.length do
       if !seen(i) then
         values(i) = defaults(i) match
-          case Some(d) => d
-          case None =>
+          case NotExists =>
             if optionalFlags(i) || isOption(i) then None
             else throw new MissingField(s"missing field: ${labels(i)}")
+          case d => d
       i += 1
     fromArray(values)
   catch case rf: ReadFailure => throw rf.withRootType(typeName)
