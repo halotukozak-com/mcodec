@@ -1,11 +1,10 @@
 package halotukozak.mcodec
 
 import halotukozak.mcodec.MValue.*
-import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.Arbitrary
 
 import java.lang as jl
 import java.util as ju
-import scala.jdk.CollectionConverters.*
 
 class ExtendedStdCodecsTest extends RoundTrip(InMemoryBackend), JsonConv:
 

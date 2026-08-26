@@ -2,8 +2,6 @@
 
 package halotukozak.mcodec
 
-import halotukozak.mcodec.MValue.*
-
 import java.util as ju
 
 // Passes on JVM and Scala.js; crashes the Scala Native runtime with

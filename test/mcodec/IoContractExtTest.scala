@@ -68,7 +68,7 @@ class IoContractExtTest extends munit.FunSuite:
     intercept[ReadFailure](imRead(MString(""))(_.readChar()))
 
   // ===== Float precision =====
-  private val floatCases =
+  private lazy val floatCases =
     Seq(Float.MinValue, Float.MaxValue, Float.MinPositiveValue, -0.0f, 0.0f, 1.1f, 1.4e-45f, 3.14159f)
 
   test("Float round-trips EXACTLY via InMemory"):
@@ -93,7 +93,7 @@ class IoContractExtTest extends munit.FunSuite:
     assert(jsonHarvest(_.writeFloat(Float.NaN)).startsWith("\""))
 
   // ===== Timestamp =====
-  private val tsCases = Seq(0L, 1L, 1L << 50, Long.MaxValue, -1000L)
+  private lazy val tsCases = Seq(0L, 1L, 1L << 50, Long.MaxValue, -1000L)
 
   test("Timestamp round-trips via InMemory"):
     for t <- tsCases do assertEquals(imRead(imHarvest(_.writeTimestamp(t)))(_.readTimestamp()), t)
@@ -106,7 +106,7 @@ class IoContractExtTest extends munit.FunSuite:
     assertEquals(jsonHarvest(_.writeTimestamp(1750000000000L)), "1750000000000")
 
   // ===== Binary =====
-  private val binCases: Seq[Array[Byte]] =
+  private lazy val binCases: Seq[Array[Byte]] =
     Seq(
       Array.empty[Byte],
       Array[Byte](1, 2, 3),
