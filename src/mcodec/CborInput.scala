@@ -229,14 +229,17 @@ class CborInput(reader: CborReader) extends InputAndSimpleInput:
           case _ => ()
       case _ => throw ReadFailure(s"cannot skip major type $major")
 
-  private def skipChunks(major: Int): Unit =
+  // TODO: `major` is accepted but never checked against each chunk's own major type
+  // (discarded below as `_`) — malformed CBOR with mismatched chunk major types
+  // inside an indefinite-length container is currently accepted rather than rejected.
+  private def skipChunks(@scala.annotation.unused major: Int): Unit =
     var done = false
     while !done do
       if reader.peekU8() == 0xff then
         reader.u8()
         done = true
       else
-        val (cm, ca) = reader.readInitial()
+        val (_, ca) = reader.readInitial()
         reader.readBytes(reader.readArg(ca).toInt)
 
   // Skip an indefinite container's items until the 0xFF break. `perItem` is the
