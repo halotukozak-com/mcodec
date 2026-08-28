@@ -13,6 +13,14 @@ class BsonRoundTripTest extends RoundTrip(BsonBackend):
 
   given Arbitrary[Double] = Arbitrary(Arbitrary.arbitrary[Double].suchThat(java.lang.Double.isFinite))
 
+  // BSON field names are cstrings and cannot contain a NUL byte (see BsonOutput.writeCString).
+  given Arbitrary[Map[String, Int]] = Arbitrary(
+    Gen.mapOf(for
+      k <- Arbitrary.arbitrary[String].map(_.filterNot(_ == '\u0000'))
+      v <- Arbitrary.arbitrary[Int]
+    yield k -> v),
+  )
+
   // FlatShape Arbitrary — copy from FlatDiscriminatorTest (that given is scoped to its own suite).
   given Arbitrary[FlatShape] = Arbitrary(
     Gen.oneOf(
