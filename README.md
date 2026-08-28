@@ -29,7 +29,7 @@ collections (`List`, `Vector`, `Seq`, `Set`, `Map`).
 ### scala-cli
 
 ```scala
-//> using scala 3.9.0-RC4
+//> using scala 3.9.0
 //> using dep com.halotukozak::mcodec::<version>
 ```
 
@@ -43,7 +43,7 @@ libraryDependencies += "com.halotukozak" %% "mcodec" % "<version>"
 ### mill
 
 ```scala
-def scalaVersion = "3.9.0-RC4"
+def scalaVersion = "3.9.0"
 def mvDeps = Seq(mvn"com.halotukozak::mcodec::<version>")
 ```
 
