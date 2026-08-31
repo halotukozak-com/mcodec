@@ -3,7 +3,7 @@
 **GenCodec-style serialization for Scala 3** — a format-agnostic, streaming `Input`/`Output` core with type class
 derivation built on [M&DE](https://github.com/halotukozak/made). Ships with a JSON backend.
 
-> **Experimental.** Pinned to Scala **3.9.0-RC4** (Scala Next), required by Made (`made_3:0.1.2`). JVM only.
+> **Experimental.** Pinned to Scala **3.9.0**, required by Made (`made_3:0.4.1`). JVM only.
 
 ## Overview
 
@@ -36,7 +36,7 @@ collections (`List`, `Vector`, `Seq`, `Set`, `Map`).
 ### sbt
 
 ```scala
-scalaVersion := "3.9.0-RC4"
+scalaVersion := "3.9.0"
 libraryDependencies += "com.halotukozak" %% "mcodec" % "<version>"
 ```
 
@@ -44,7 +44,7 @@ libraryDependencies += "com.halotukozak" %% "mcodec" % "<version>"
 
 ```scala
 def scalaVersion = "3.9.0"
-def mvDeps = Seq(mvn"com.halotukozak::mcodec::<version>")
+def mvnDeps = Seq(mvn"com.halotukozak::mcodec::<version>")
 ```
 
 ## Quickstart
