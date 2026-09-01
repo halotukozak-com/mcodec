@@ -1,9 +1,11 @@
 # mcodec
 
 **GenCodec-style serialization for Scala 3** — a format-agnostic, streaming `Input`/`Output` core with type class
-derivation built on [M&DE](https://github.com/halotukozak/made). Ships with a JSON backend.
+derivation built on [M&DE](https://github.com/halotukozak/made). Ships with a JSON backend; BSON and CBOR `Input`/
+`Output` implementations exist in-tree but aren't wired up to a public `read`/`write` entry point yet.
 
-> **Experimental.** Pinned to Scala **3.9.0**, required by Made (`made_3:0.4.1`). JVM only.
+> **Experimental.** Pinned to Scala **3.9.0**, required by Made (`made_3:0.4.1`). Cross-built for JVM, Scala.js, and
+> Scala Native.
 
 ## Overview
 
@@ -14,7 +16,9 @@ an abstract streaming `Input`/`Output`, so the same `MCodec[T]` works across any
 - **One type class for read and write** — `MCodec[T]` with `read(input)` / `write(output, value)`
 - **Format-agnostic core** — codecs target a streaming `Input`/`Output`; the JSON backend is just one implementation
 - **Automatic derivation** — `derives MCodec` for case classes, enums, and sealed hierarchies, powered by M&DE mirrors
-- **Annotation-aware** — `@name` to rename fields and ADT cases on the wire, `@flatten` / `@defaultCase` for ADTs
+- **Annotation-aware** — `@name` to rename fields and ADT cases on the wire, `@flatten` / `@defaultCase` for ADTs,
+  `@stringEnum` to encode an enum case by name, `@outOfOrder` to accept a field regardless of wire position, and
+  `@transientDefault` to omit a field from output when it equals its declared default
 - **Combinators** — `transform`, `transformed`, `nullable`, and `makeLazy` for building codecs from existing ones
 - **Explicit nulls** — compiled with `-Yexplicit-nulls`; nullability is expressed in the types
 
@@ -23,28 +27,27 @@ collections (`List`, `Vector`, `Seq`, `Set`, `Map`).
 
 ## Installation
 
-> mcodec has not had its first release yet. The coordinates below are how it will be published to Maven Central under
-> `com.halotukozak` once tagged. Until then, build from source (see [Build](#build)).
+Published to Maven Central under `com.halotukozak`.
 
 ### scala-cli
 
 ```scala
 //> using scala 3.9.0
-//> using dep com.halotukozak::mcodec::<version>
+//> using dep com.halotukozak::mcodec::0.2.0
 ```
 
 ### sbt
 
 ```scala
 scalaVersion := "3.9.0"
-libraryDependencies += "com.halotukozak" %% "mcodec" % "<version>"
+libraryDependencies += "com.halotukozak" %% "mcodec" % "0.2.0"
 ```
 
 ### mill
 
 ```scala
 def scalaVersion = "3.9.0"
-def mvnDeps = Seq(mvn"com.halotukozak::mcodec::<version>")
+def mvnDeps = Seq(mvn"com.halotukozak::mcodec::0.2.0")
 ```
 
 ## Quickstart
