@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Full benchmark run: publish mcodec locally, run the JMH serde matrix, run the
-# compile-time sweep, aggregate to CSV, refresh docs/benchmarks.md and the charts.
+# compile-time sweep, aggregate to CSV, refresh docs/_docs/benchmarks.md and the charts.
 #
 #   benchmark/scripts/run_all.sh [quick|full]
 #
@@ -40,4 +40,4 @@ echo "==> aggregating + refreshing report"
 python3 benchmark/scripts/aggregate.py --results "$RESULTS"
 benchmark/scripts/plot.py --results "$RESULTS" || echo "(plot skipped — need 'uv' or matplotlib)"
 
-echo "==> done. See docs/benchmarks.md and benchmark/results/*.csv"
+echo "==> done. See docs/_docs/benchmarks.md and benchmark/results/*.csv"

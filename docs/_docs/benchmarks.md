@@ -1,4 +1,8 @@
-# mcodec benchmarks
+---
+title: Benchmarks
+---
+
+# Benchmarks
 
 How mcodec compares to popular Scala 3 JSON libraries on the two axes that matter for a derivation-based codec: **how
 long it takes the compiler** to derive codecs, and **how fast those codecs run**.
@@ -40,7 +44,7 @@ long it takes the compiler** to derive codecs, and **how fast those codecs run**
 ## Scenarios
 
 Four models, each stressing a different part of a codec — see
-[`benchmark/src/models/Models.scala`](../benchmark/src/models/Models.scala):
+[`benchmark/src/models/Models.scala`](https://github.com/halotukozak-com/mcodec/blob/main/benchmark/src/models/Models.scala):
 
 | model                   | shape                                                       | stresses                                               |
 |-------------------------|-------------------------------------------------------------|--------------------------------------------------------|
@@ -62,7 +66,7 @@ path.
 Each library reads back **its own** output — wire shapes differ between libraries (nested-discriminator vs. `"type"`
 field, etc.) and that is expected; the benchmark measures each library's own round trip, not cross-compatibility.
 
-**GenCodec** runs from a separate Scala 2.13 build ([`benchmark/gencodec/`](../benchmark/gencodec/)) — same models,
+**GenCodec** runs from a separate Scala 2.13 build ([`benchmark/gencodec/`](https://github.com/halotukozak-com/mcodec/blob/main/benchmark/gencodec/)) — same models,
 payloads and JMH settings, through `JsonStringOutput` / `JsonStringInput`. Same JVM, so throughput is directly
 comparable.
 
@@ -96,8 +100,8 @@ _Throughput, ops/s (higher is better) — `read`._
 | zio-json | 1,984,531 | 36,909 | 66,179 | 2,672 |
 <!-- BENCH:serde-read END -->
 
-![write throughput](assets/benchmarks/serde-write.png)
-![read throughput](assets/benchmarks/serde-read.png)
+![write throughput](images/benchmarks/serde-write.png)
+![read throughput](images/benchmarks/serde-read.png)
 
 ## Compilation time
 
@@ -111,7 +115,7 @@ scales with the *number* of derived codecs.)
 
 The `N=0` row is the fixed cost (JVM + scalac startup + dependency classpath); the **slope** from `N=1` upward is the
 derivation cost. Generator and driver:
-[`benchmark/compile/`](../benchmark/compile/).
+[`benchmark/compile/`](https://github.com/halotukozak-com/mcodec/blob/main/benchmark/compile/).
 
 GenCodec is included here as a **cross-ecosystem** reference — it is compiled by Scala 2.13, so it is not a
 like-for-like measurement against the Scala 3 compiler, but it does answer "is mcodec's Scala 3 `inline` derivation
@@ -149,8 +153,8 @@ _Seconds per scalac phase for the N=50 project. Macro / mirror derivation and `i
 | zio-json | 0.07 | 0.75 | 0.24 | 2.09 | 0.52 | 0.74 | **2.84** |
 <!-- BENCH:compile END -->
 
-![compile scaling](assets/benchmarks/compile-scaling.png)
-![compile phases](assets/benchmarks/compile-phases.png)
+![compile scaling](images/benchmarks/compile-scaling.png)
+![compile phases](images/benchmarks/compile-phases.png)
 
 ## Caveats
 

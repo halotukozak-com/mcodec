@@ -133,7 +133,7 @@ def inject(report: Path, blocks: dict[str, str]) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--results", default=str(REPO / "benchmark" / "results"))
-    ap.add_argument("--report", default=str(REPO / "docs" / "benchmarks.md"))
+    ap.add_argument("--report", default=str(REPO / "docs" / "_docs" / "benchmarks.md"))
     args = ap.parse_args()
     res, report = Path(args.results), Path(args.report)
 

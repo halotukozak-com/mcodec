@@ -8,7 +8,7 @@
     plot.py [--results DIR] [--out DIR]
 
 Reads  benchmark/results/{serde.csv,compile.csv,compile-phases.csv}
-Writes docs/assets/benchmarks/{serde-write,serde-read,compile-scaling,compile-phases}.png
+Writes docs/_assets/images/benchmarks/{serde-write,serde-read,compile-scaling,compile-phases}.png
 """
 import argparse
 import csv
@@ -117,7 +117,7 @@ def phase_chart(rows: list[dict], out: Path) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--results", default=str(REPO / "benchmark" / "results"))
-    ap.add_argument("--out", default=str(REPO / "docs" / "assets" / "benchmarks"))
+    ap.add_argument("--out", default=str(REPO / "docs" / "_assets" / "images" / "benchmarks"))
     args = ap.parse_args()
     res, out = Path(args.results), Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
