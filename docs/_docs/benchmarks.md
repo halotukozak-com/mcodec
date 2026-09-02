@@ -102,8 +102,10 @@ _Throughput, ops/s (higher is better) — `read`._
 | zio-json | 1,984,531 | 36,909 | 66,179 | 2,672 |
 <!-- BENCH:serde-read END -->
 
-![write throughput](images/benchmarks/serde-write.png)
-![read throughput](images/benchmarks/serde-read.png)
+_Charts show throughput **relative to mcodec** on each model (mcodec = 1.0, taller is faster); absolute ops/s are in the tables above._
+
+![write throughput relative to mcodec](images/benchmarks/serde-write.png)
+![read throughput relative to mcodec](images/benchmarks/serde-read.png)
 
 ## Compilation time
 

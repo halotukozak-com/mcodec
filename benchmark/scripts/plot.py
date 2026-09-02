@@ -43,19 +43,26 @@ def serde_chart(rows: list[dict], op: str, out: Path) -> None:
     libs = sorted({r["library"] for r in data})
     score = {(r["library"], r["model"]): float(r["score_ops_s"]) for r in data}
 
+    # each bar is the library's throughput / mcodec's on the same model (mcodec = 1.0)
+    models = [m for m in models if score.get((HIGHLIGHT, m), 0) > 0]
+    ratio = {(lib, m): score.get((lib, m), 0) / score[(HIGHLIGHT, m)]
+             for lib in libs for m in models}
+
     fig, ax = plt.subplots(figsize=(11, 6))
     n = len(libs)
     width = 0.8 / n
     for i, lib in enumerate(libs):
         xs = [j + (i - n / 2) * width + width / 2 for j in range(len(models))]
-        ys = [score.get((lib, m), 0) for m in models]
-        ax.bar(xs, ys, width, label=lib, color=COLORS.get(lib, "#444"),
-               edgecolor="black" if lib == HIGHLIGHT else "none",
-               linewidth=1.4 if lib == HIGHLIGHT else 0)
-    ax.set_yscale("log")
+        ys = [ratio.get((lib, m), 0) for m in models]
+        bars = ax.bar(xs, ys, width, label=lib, color=COLORS.get(lib, "#444"),
+                      edgecolor="black" if lib == HIGHLIGHT else "none",
+                      linewidth=1.4 if lib == HIGHLIGHT else 0)
+        ax.bar_label(bars, labels=[f"{y:.1f}×" if y else "" for y in ys],
+                     padding=2, fontsize=6)
+    ax.axhline(1.0, color=COLORS[HIGHLIGHT], lw=1, ls="--", alpha=0.6)
     ax.set_xticks(range(len(models)))
     ax.set_xticklabels(models)
-    ax.set_ylabel("throughput — ops/s (log scale, higher is better)")
+    ax.set_ylabel(f"{op} throughput relative to mcodec  (mcodec = 1.0, higher is better)")
     ax.set_title(f"JSON {op}: mcodec vs. the Scala JSON field")
     ax.legend(ncol=n, fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.08))
     ax.grid(axis="y", alpha=0.3)
