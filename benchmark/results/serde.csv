@@ -1,63 +1,63 @@
 library,model,op,score_ops_s,error
-mcodec,Batch (collections),read,2099.3,116.3
-circe,Batch (collections),read,1960.1,23.5
-jsoniter,Batch (collections),read,6867.4,56.6
-upickle,Batch (collections),read,2255.1,27.2
-zio-json,Batch (collections),read,2671.5,12.8
-borer,Batch (collections),read,3484.7,143.6
-play-json,Batch (collections),read,1329.2,37.4
-mcodec,Batch (collections),write,3090.7,29.3
-circe,Batch (collections),write,1917.1,26.3
-jsoniter,Batch (collections),write,7284.4,73.1
-upickle,Batch (collections),write,3850.7,282.6
-zio-json,Batch (collections),write,7520.0,159.2
-borer,Batch (collections),write,4329.7,27.1
-play-json,Batch (collections),write,2012.5,36.3
-mcodec,Company (nested),read,23443.6,1544.2
-circe,Company (nested),read,21536.1,181.6
-jsoniter,Company (nested),read,107622.1,596.8
-upickle,Company (nested),read,30710.4,1458.1
-zio-json,Company (nested),read,36909.2,1143.7
-borer,Company (nested),read,45065.5,345.4
-play-json,Company (nested),read,13592.5,89.4
-mcodec,Company (nested),write,39435.2,257.2
-circe,Company (nested),write,29118.7,1248.2
-jsoniter,Company (nested),write,159730.8,4874.9
-upickle,Company (nested),write,64275.5,1492.4
-zio-json,Company (nested),write,100907.9,3356.2
-borer,Company (nested),write,45140.8,166.8
-play-json,Company (nested),write,21763.7,286.1
-mcodec,Geometry (ADT),read,26402.3,102.5
-circe,Geometry (ADT),read,32572.8,1538.4
-jsoniter,Geometry (ADT),read,202481.6,1072.7
-upickle,Geometry (ADT),read,31040.8,801.4
-zio-json,Geometry (ADT),read,66178.9,5179.0
-borer,Geometry (ADT),read,46510.1,176.9
-mcodec,Geometry (ADT),write,87277.0,7944.5
-circe,Geometry (ADT),write,47221.6,2189.8
-jsoniter,Geometry (ADT),write,179075.6,442.4
-upickle,Geometry (ADT),write,94457.4,1562.1
-zio-json,Geometry (ADT),write,147985.8,1949.3
-borer,Geometry (ADT),write,90173.6,416.1
-mcodec,Primitives,read,1063834.1,42608.1
-circe,Primitives,read,1121403.7,7633.1
-jsoniter,Primitives,read,5123041.2,170754.2
-upickle,Primitives,read,1372504.1,9821.2
-zio-json,Primitives,read,1984531.2,11939.8
-borer,Primitives,read,3010363.8,33547.5
-play-json,Primitives,read,735036.1,6671.7
-mcodec,Primitives,write,1611690.9,172575.0
-circe,Primitives,write,1224572.4,20241.1
-jsoniter,Primitives,write,10491500.2,191950.8
-upickle,Primitives,write,3123447.9,63092.0
-zio-json,Primitives,write,5405113.5,150029.0
-borer,Primitives,write,2192366.7,21914.3
-play-json,Primitives,write,602348.0,6846.5
-gencodec,Batch (collections),read,1966.7,47.6
-gencodec,Batch (collections),write,3967.4,49.8
-gencodec,Company (nested),read,22807.5,1019.8
-gencodec,Company (nested),write,55281.7,1059.0
-gencodec,Geometry (ADT),read,29345.4,298.4
-gencodec,Geometry (ADT),write,84052.6,1068.9
-gencodec,Primitives,read,997702.7,18954.3
-gencodec,Primitives,write,2782406.1,31198.4
+mcodec,Batch (collections),read,2158.5,16.7
+circe,Batch (collections),read,1916.5,22.2
+jsoniter,Batch (collections),read,6728.5,74.2
+upickle,Batch (collections),read,2238.8,28.6
+zio-json,Batch (collections),read,2635.8,35.7
+borer,Batch (collections),read,3437.8,62.0
+play-json,Batch (collections),read,1324.2,12.0
+mcodec,Batch (collections),write,4956.1,32.8
+circe,Batch (collections),write,2068.2,51.9
+jsoniter,Batch (collections),write,7169.6,77.4
+upickle,Batch (collections),write,3838.8,99.7
+zio-json,Batch (collections),write,7277.3,64.3
+borer,Batch (collections),write,4259.5,18.7
+play-json,Batch (collections),write,1990.8,41.0
+mcodec,Company (nested),read,22771.0,179.7
+circe,Company (nested),read,21114.3,147.2
+jsoniter,Company (nested),read,106796.4,551.1
+upickle,Company (nested),read,29536.4,643.8
+zio-json,Company (nested),read,36245.5,778.2
+borer,Company (nested),read,44064.6,116.2
+play-json,Company (nested),read,12913.2,316.1
+mcodec,Company (nested),write,62407.1,759.3
+circe,Company (nested),write,27606.7,65.2
+jsoniter,Company (nested),write,124316.1,29330.2
+upickle,Company (nested),write,61776.5,716.5
+zio-json,Company (nested),write,98183.5,967.8
+borer,Company (nested),write,44463.5,443.0
+play-json,Company (nested),write,20996.3,161.9
+mcodec,Geometry (ADT),read,27543.9,73.0
+circe,Geometry (ADT),read,29886.9,826.3
+jsoniter,Geometry (ADT),read,199774.2,777.4
+upickle,Geometry (ADT),read,30525.3,214.3
+zio-json,Geometry (ADT),read,63103.9,2148.0
+borer,Geometry (ADT),read,46351.6,426.8
+mcodec,Geometry (ADT),write,93546.2,930.1
+circe,Geometry (ADT),write,47111.2,1288.7
+jsoniter,Geometry (ADT),write,180647.5,6533.1
+upickle,Geometry (ADT),write,91892.2,778.2
+zio-json,Geometry (ADT),write,145846.5,784.8
+borer,Geometry (ADT),write,89098.9,476.9
+mcodec,Primitives,read,1193576.3,19328.3
+circe,Primitives,read,871773.0,97441.5
+jsoniter,Primitives,read,5143890.2,45763.3
+upickle,Primitives,read,1358158.4,13100.0
+zio-json,Primitives,read,1835303.5,49020.9
+borer,Primitives,read,2947057.8,7657.7
+play-json,Primitives,read,703554.0,3569.8
+mcodec,Primitives,write,2677376.5,9188.7
+circe,Primitives,write,1176097.4,3293.0
+jsoniter,Primitives,write,9460077.3,884663.5
+upickle,Primitives,write,3075141.8,44731.5
+zio-json,Primitives,write,5239480.9,14554.6
+borer,Primitives,write,2154284.3,12005.3
+play-json,Primitives,write,583419.8,2177.9
+gencodec,Batch (collections),read,1979.4,21.8
+gencodec,Batch (collections),write,3882.6,15.7
+gencodec,Company (nested),read,22107.8,313.9
+gencodec,Company (nested),write,53698.3,296.8
+gencodec,Geometry (ADT),read,29038.7,91.8
+gencodec,Geometry (ADT),write,83343.4,353.2
+gencodec,Primitives,read,951709.9,18224.6
+gencodec,Primitives,write,2769761.8,7639.3
