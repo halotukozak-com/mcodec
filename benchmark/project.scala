@@ -9,7 +9,7 @@
 
 // mcodec itself. Publish it into the local Ivy cache first:
 //   scala-cli --power publish local . --project-version 0.0.0-BENCH
-//> using dep com.halotukozak::mcodec::0.0.0-BENCH
+//> using dep com.halotukozak::mcodec::0.2.0
 //> using dep com.halotukozak::made::0.5.0
 
 //> using jmh
