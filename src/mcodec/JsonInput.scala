@@ -1,5 +1,7 @@
 package halotukozak.mcodec
 
+import scala.annotation.switch
+
 enum JsonToken:
   case Obj, Arr, Str, Bool, Num
 
@@ -21,7 +23,7 @@ final class JsonReader(s: String):
 
   private def skipWs(): Unit =
     while i < s.length &&
-      (s.charAt(i) match
+      ((s.charAt(i): @switch) match
         case ' ' | '\t' | '\n' | '\r' => true
         case _ => false)
     do i += 1
@@ -108,13 +110,13 @@ final class JsonReader(s: String):
       if i >= s.length then throw ReadFailure("unterminated string" + posSuffix(i))
       val c = s.charAt(i)
       i += 1
-      c match
+      (c: @switch) match
         case '"' => done = true
         case '\\' =>
           if i >= s.length then throw ReadFailure("unterminated string" + posSuffix(i))
           val e = s.charAt(i)
           i += 1
-          e match
+          (e: @switch) match
             case '"' => b.append('"')
             case '\\' => b.append('\\')
             case '/' => b.append('/')
@@ -155,7 +157,7 @@ final class JsonReader(s: String):
   def skipValue(): Unit =
     skipWs()
     if i >= s.length then throw ReadFailure("unexpected end of input" + posSuffix(i))
-    s.charAt(i) match
+    (s.charAt(i): @switch) match
       case '{' => skipContainer('{', '}')
       case '[' => skipContainer('[', ']')
       case '"' => readRawString()
@@ -191,7 +193,7 @@ final class JsonReader(s: String):
   private[mcodec] def peekToken: JsonToken =
     skipWs()
     if i >= s.length then throw ReadFailure("unexpected end of input" + posSuffix(i))
-    s.charAt(i) match
+    (s.charAt(i): @switch) match
       case '{' => JsonToken.Obj
       case '[' => JsonToken.Arr
       case '"' => JsonToken.Str

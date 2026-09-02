@@ -1,5 +1,7 @@
 package halotukozak.mcodec
 
+import scala.annotation.switch
+
 // Double/Float#toString renders whole numbers as "2.0" on the JVM but "2" on Scala.js;
 // this keeps the JSON output identical across platforms (and recognizably floating-point).
 private def numberString(s: String): String =
@@ -17,7 +19,7 @@ private def writeJsonString(sb: java.lang.StringBuilder, s: String): Unit =
     sb.append(s, 0, i)
     while i < n do
       val c = s.charAt(i)
-      c match
+      (c: @switch) match
         case '"' => sb.append("\\\"")
         case '\\' => sb.append("\\\\")
         case '\b' => sb.append("\\b")
