@@ -64,12 +64,15 @@ trait Derivation:
         m.ordinal,
       )
     else inline if m.hasAnnotation[halotukozak.mcodec.annotation.flatten] then
+      val caseKey = inline m.getAnnotation[halotukozak.mcodec.annotation.flatten] match
+        case f: halotukozak.mcodec.annotation.flatten => f.key
+        case _ => "_case"
       FlatSumCodec[T](
         compiletime.constValue[m.Label],
         compiletime.constValueTuple[m.ElemLabels].toArrayOf[String],
         summonOrDeriveCases[m.ElemTypes].toArray,
         m.ordinal,
-        Option(m.getAnnotation[halotukozak.mcodec.annotation.flatten]).fold("_case")(_.key),
+        caseKey,
         defaultCaseIdx(m.elems.hasAnnotations[halotukozak.mcodec.annotation.defaultCase]),
       )
     else
