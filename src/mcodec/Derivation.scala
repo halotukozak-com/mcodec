@@ -2,6 +2,7 @@ package halotukozak.mcodec
 
 import halotukozak.made.*
 import halotukozak.made.annotation.optionalParam
+import halotukozak.mcodec.annotation.{outOfOrder, transientDefault}
 import halotukozak.commons.*
 import scala.annotation.nowarn
 
@@ -13,30 +14,33 @@ trait Derivation:
     case tm: Made.TransparentOf[T] => deriveTransparent[T](tm)
     case gm: Made.SingletonOf[T] => deriveSingleton[T](gm)
 
-  inline def deriveProduct[T](m: Made.ProductOf[T]): MCodec[T] = ProductCodec[T](
-    compiletime.constValue[m.Label],
-    compiletime.constValueTuple[m.ElemLabels].toArrayOf[String],
-    compiletime.summonAll[Tuple.Map[m.ElemTypes, MCodec]].toArrayOf[MCodec[Any]](using containsOnly.refl),
-    m.elems
-      .mapAs[MadeFieldElem][[e] =>> Any | NotExists]([e <: MadeFieldElem] => elem => elem.default)
-      .toArrayOf[Any | NotExists],
-    m.elems.hasAnnotations[optionalParam].toArrayOf[Boolean],
-    isOptionFlags[m.ElemTypes].toArray,
-    m.elems.hasAnnotations[halotukozak.mcodec.annotation.transientDefault].toArrayOf[Boolean],
-    m.elems.hasAnnotations[halotukozak.mcodec.annotation.outOfOrder].toArrayOf[Boolean],
-    m.fromUnsafeArray,
-    compiletime
-      .constValueTuple[Tuple.Map[m.GeneratedElems, MadeElem.ExtractLabel]]
-      .toArrayOf[String],
-    m.generatedElems
-      .mapAs[GeneratedMadeElem][[e] =>> T => Any]([e <: GeneratedMadeElem] =>
-        elem => outer => elem.apply(outer.asInstanceOf[elem.OuterType]),
-      )
-      .toArrayOf[T => Any],
-    compiletime
-      .summonAll[Tuple.Map[Tuple.Map[m.GeneratedElems, MadeElem.ExtractOf], MCodec]]
-      .toArrayOf[MCodec[Any]](using containsOnly.refl),
-  )
+  inline def deriveProduct[T](m: Made.ProductOf[T]): MCodec[T] =
+    val (optionalFlags, transientDefaultFlags, outOfOrderFlags) =
+      m.elems.hasAnnotationsByType[(optionalParam, transientDefault, outOfOrder)]
+    ProductCodec[T](
+      compiletime.constValue[m.Label],
+      compiletime.constValueTuple[m.ElemLabels].toArrayOf[String],
+      compiletime.summonAll[Tuple.Map[m.ElemTypes, MCodec]].toArrayOf[MCodec[Any]](using containsOnly.refl),
+      m.elems
+        .mapAs[MadeFieldElem][[e] =>> Any | NotExists]([e <: MadeFieldElem] => elem => elem.default)
+        .toArrayOf[Any | NotExists],
+      optionalFlags.toArray.map(_.asInstanceOf[Boolean]),
+      isOptionFlags[m.ElemTypes].toArray,
+      transientDefaultFlags.toArray.map(_.asInstanceOf[Boolean]),
+      outOfOrderFlags.toArray.map(_.asInstanceOf[Boolean]),
+      m.fromUnsafeArray,
+      compiletime
+        .constValueTuple[Tuple.Map[m.GeneratedElems, MadeElem.ExtractLabel]]
+        .toArrayOf[String],
+      m.generatedElems
+        .mapAs[GeneratedMadeElem][[e] =>> T => Any]([e <: GeneratedMadeElem] =>
+          elem => outer => elem.apply(outer.asInstanceOf[elem.OuterType]),
+        )
+        .toArrayOf[T => Any],
+      compiletime
+        .summonAll[Tuple.Map[Tuple.Map[m.GeneratedElems, MadeElem.ExtractOf], MCodec]]
+        .toArrayOf[MCodec[Any]](using containsOnly.refl),
+    )
 
   inline def isOptionFlags[Elems <: Tuple]: List[Boolean] = inline compiletime.erasedValue[Elems] match
     case _: EmptyTuple => Nil

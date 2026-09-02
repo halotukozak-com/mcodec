@@ -4,7 +4,7 @@
 derivation built on [M&DE](https://github.com/halotukozak/made). Ships with a JSON backend; BSON and CBOR `Input`/
 `Output` implementations exist in-tree but aren't wired up to a public `read`/`write` entry point yet.
 
-> **Experimental.** Pinned to Scala **3.9.0**, required by Made (`made_3:0.5.0`). Cross-built for JVM, Scala.js, and
+> **Experimental.** Pinned to Scala **3.9.0**, required by Made (`made_3:0.5.1`). Cross-built for JVM, Scala.js, and
 > Scala Native.
 
 ## Overview
