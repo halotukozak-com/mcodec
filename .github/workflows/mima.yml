@@ -53,7 +53,7 @@ jobs:
             baseline_label="main@${base_sha:0:7}"
             echo "Baseline: $baseline_label (does this PR itself introduce a new binary incompatibility?)"
             git worktree add --detach --quiet "$RUNNER_TEMP/old-src" "$base_sha"
-            scala-cli --power package "$RUNNER_TEMP/old-src" --library -o "$RUNNER_TEMP/old.jar" --force
+            scala-cli --power package "$RUNNER_TEMP/old-src" --exclude benchmark --library -o "$RUNNER_TEMP/old.jar" --force
             old_jar="$RUNNER_TEMP/old.jar"
           else
             base_tag=$(git tag -l 'v*' --sort=-v:refname | head -1)
