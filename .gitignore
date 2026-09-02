@@ -10,3 +10,10 @@ scala-doc
 # coverage (keep the report generator script)
 .scoverage/*
 !.scoverage/report.sc
+
+# benchmark run artifacts — keep the tidy CSVs, drop the bulky raw output
+benchmark/results/*.json
+benchmark/results/compile-raw.csv
+benchmark/results-env.txt
+__pycache__/
+

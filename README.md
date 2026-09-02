@@ -92,10 +92,21 @@ val nullableInt: MCodec[Int | Null] = MCodec[Int].nullable
 ## Build
 
 ```sh
-scala-cli --power compile .
-scala-cli --power test .
+scala-cli --power compile . --exclude benchmark
+scala-cli --power test . --exclude benchmark
 scala-cli --power fmt .
 ```
+
+`--exclude benchmark` keeps the separate benchmark build (competitor deps, JMH)
+out of the library build — `scala-cli` has no directive for this.
+
+## Benchmarks
+
+[`docs/benchmarks.md`](docs/benchmarks.md) compares mcodec's **compile time** and
+**serialization throughput** against circe, jsoniter-scala, uPickle, zio-json,
+borer, play-json and AVSystem GenCodec (the design mcodec is modelled on). The
+suite lives in [`benchmark/`](benchmark/) (a separate scala-cli build) and is
+regenerated with `benchmark/scripts/run_all.sh`.
 
 ## Acknowledgements
 

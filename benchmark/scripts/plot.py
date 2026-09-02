@@ -1,0 +1,134 @@
+#!/usr/bin/env -S uv run --quiet --with matplotlib --script
+# /// script
+# requires-python = ">=3.10"
+# dependencies = ["matplotlib"]
+# ///
+"""Render benchmark charts from the aggregated CSVs.
+
+    plot.py [--results DIR] [--out DIR]
+
+Reads  benchmark/results/{serde.csv,compile.csv,compile-phases.csv}
+Writes docs/assets/benchmarks/{serde-write,serde-read,compile-scaling,compile-phases}.png
+"""
+import argparse
+import csv
+from collections import defaultdict
+from pathlib import Path
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+REPO = Path(__file__).resolve().parent.parent.parent
+HIGHLIGHT = "mcodec"
+MODEL_ORDER = ["Primitives", "Company (nested)", "Geometry (ADT)", "Batch (collections)"]
+# colour-blind-safe (Okabe-Ito); mcodec gets the vivid vermillion
+COLORS = {
+    "mcodec": "#D55E00", "circe": "#0072B2", "jsoniter": "#009E73",
+    "upickle": "#CC79A7", "zio-json": "#E69F00", "borer": "#56B4E9",
+    "play-json": "#999999", "gencodec": "#661100",
+}
+
+
+def read_csv(path: Path) -> list[dict]:
+    return list(csv.DictReader(path.open())) if path.exists() else []
+
+
+def serde_chart(rows: list[dict], op: str, out: Path) -> None:
+    data = [r for r in rows if r["op"] == op]
+    if not data:
+        return
+    present = {r["model"] for r in data}
+    models = [m for m in MODEL_ORDER if m in present] + sorted(present - set(MODEL_ORDER))
+    libs = sorted({r["library"] for r in data})
+    score = {(r["library"], r["model"]): float(r["score_ops_s"]) for r in data}
+
+    fig, ax = plt.subplots(figsize=(11, 6))
+    n = len(libs)
+    width = 0.8 / n
+    for i, lib in enumerate(libs):
+        xs = [j + (i - n / 2) * width + width / 2 for j in range(len(models))]
+        ys = [score.get((lib, m), 0) for m in models]
+        ax.bar(xs, ys, width, label=lib, color=COLORS.get(lib, "#444"),
+               edgecolor="black" if lib == HIGHLIGHT else "none",
+               linewidth=1.4 if lib == HIGHLIGHT else 0)
+    ax.set_yscale("log")
+    ax.set_xticks(range(len(models)))
+    ax.set_xticklabels(models)
+    ax.set_ylabel("throughput — ops/s (log scale, higher is better)")
+    ax.set_title(f"JSON {op}: mcodec vs. the Scala JSON field")
+    ax.legend(ncol=n, fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.08))
+    ax.grid(axis="y", alpha=0.3)
+    fig.tight_layout()
+    fig.savefig(out, dpi=130, bbox_inches="tight")
+    plt.close(fig)
+
+
+def compile_scaling(rows: list[dict], out: Path) -> None:
+    if not rows:
+        return
+    series: dict[str, list[tuple[int, float]]] = defaultdict(list)
+    for r in rows:
+        if r["ok"] == "True" and r["mean_s"]:
+            series[r["library"]].append((int(r["n"]), float(r["mean_s"])))
+    fig, ax = plt.subplots(figsize=(9, 6))
+    for lib, pts in sorted(series.items()):
+        pts.sort()
+        ax.plot([p[0] for p in pts], [p[1] for p in pts], marker="o",
+                label=lib, color=COLORS.get(lib, "#444"),
+                linewidth=2.6 if lib == HIGHLIGHT else 1.5,
+                zorder=3 if lib == HIGHLIGHT else 2)
+    ax.set_xlabel("number of derived codecs (N)")
+    ax.set_ylabel("clean compile wall time — s (lower is better)")
+    ax.set_title("Compilation time vs. model count")
+    ax.legend()
+    ax.grid(alpha=0.3)
+    fig.tight_layout()
+    fig.savefig(out, dpi=130)
+    plt.close(fig)
+
+
+def phase_chart(rows: list[dict], out: Path) -> None:
+    if not rows:
+        return
+    keep = ["parser", "typer", "posttyper", "inlining", "erasure", "genBCode"]
+    by_lib: dict[str, dict[str, float]] = defaultdict(dict)
+    for r in rows:
+        if r["phase"] in keep:
+            by_lib[r["library"]][r["phase"]] = float(r["seconds"])
+    if not by_lib:
+        return
+    libs = sorted(by_lib)
+    fig, ax = plt.subplots(figsize=(9, 6))
+    bottom = [0.0] * len(libs)
+    for ph in keep:
+        vals = [by_lib[l].get(ph, 0.0) for l in libs]
+        ax.bar(libs, vals, bottom=bottom, label=ph)
+        bottom = [b + v for b, v in zip(bottom, vals)]
+    ax.set_ylabel("seconds")
+    ax.set_title("Compiler phase breakdown (N=50 project)")
+    ax.legend()
+    ax.grid(axis="y", alpha=0.3)
+    fig.tight_layout()
+    fig.savefig(out, dpi=130)
+    plt.close(fig)
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--results", default=str(REPO / "benchmark" / "results"))
+    ap.add_argument("--out", default=str(REPO / "docs" / "assets" / "benchmarks"))
+    args = ap.parse_args()
+    res, out = Path(args.results), Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
+
+    serde = read_csv(res / "serde.csv")
+    serde_chart(serde, "write", out / "serde-write.png")
+    serde_chart(serde, "read", out / "serde-read.png")
+    compile_scaling(read_csv(res / "compile.csv"), out / "compile-scaling.png")
+    phase_chart(read_csv(res / "compile-phases.csv"), out / "compile-phases.png")
+    print(f"  charts -> {out}")
+
+
+if __name__ == "__main__":
+    main()
