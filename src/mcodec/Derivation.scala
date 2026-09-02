@@ -7,18 +7,6 @@ import scala.annotation.nowarn
 
 trait Derivation:
   this: MCodec.type =>
-  transparent inline def derivedRec[T: Made.Of as m]: MCodec[T] =
-    val deferred = new Deferred[T]
-    // `self` isn't referenced by name here, but it's what lets a recursive/self-referential
-    // T resolve MCodec[T] via implicit search during its own derivation below (deferred ties
-    // the knot). -Wunused can't see that usage since it only appears after this transparent
-    // inline def is expanded at call sites, so it's suppressed rather than removed.
-    @nowarn("msg=unused local definition")
-    given self: MCodec[T] = deferred
-    val built = deriveDispatch[T](m)
-    deferred.underlying = built
-    built
-
   transparent inline def deriveDispatch[T](m: Made.Of[T]): MCodec[T] = inline m match
     case pm: Made.ProductOf[T] => deriveProduct[T](pm)
     case sm: Made.SumOf[T] => deriveSum[T](sm)

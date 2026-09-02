@@ -2,17 +2,6 @@ package halotukozak.mcodec
 
 import halotukozak.made.NotExists
 
-final class Deferred[T] extends MCodec[T]:
-  private[mcodec] var underlying: MCodec[T] | Null = compiletime.uninitialized
-
-  def read(in: Input): T = underlying match
-    case null => throw ReadFailure("deferred codec used before initialization")
-    case u => u.read(in)
-
-  def write(out: Output, v: T): Unit = underlying match
-    case null => throw WriteFailure("deferred codec used before initialization")
-    case u => u.write(out, v)
-
 final class ProductCodec[T](
   typeName: String,
   labels: Array[String],
