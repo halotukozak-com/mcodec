@@ -66,11 +66,12 @@ final class JsonOutput(sb: java.lang.StringBuilder) extends OutputAndSimpleOutpu
 
 final class JsonListOutput(sb: java.lang.StringBuilder) extends ListOutput:
   private var first = true
+  private val elem = new JsonOutput(sb)
 
   def writeElement(): Output =
     sb.append(if first then '[' else ',')
     first = false
-    new JsonOutput(sb)
+    elem
 
   def finish(): Unit =
     if first then sb.append('[')
@@ -78,13 +79,14 @@ final class JsonListOutput(sb: java.lang.StringBuilder) extends ListOutput:
 
 final class JsonObjectOutput(sb: java.lang.StringBuilder) extends ObjectOutput:
   private var first = true
+  private val field = new JsonOutput(sb)
 
   def writeField(key: String): Output =
     sb.append(if first then '{' else ',')
     first = false
     writeJsonString(sb, key)
     sb.append(':')
-    new JsonOutput(sb)
+    field
 
   def finish(): Unit =
     if first then sb.append('{')
