@@ -5,27 +5,34 @@ package halotukozak.mcodec
 private def numberString(s: String): String =
   if s.contains('.') || s.contains('e') || s.contains('E') then s else s + ".0"
 
+inline private def needsEscape(c: Char): Boolean = c < 0x20 || c == '"' || c == '\\'
+
 private def writeJsonString(sb: java.lang.StringBuilder, s: String): Unit =
   sb.append('"')
+  val n = s.length
   var i = 0
-  while i < s.length do
-    val c = s.charAt(i)
-    c match
-      case '"' => sb.append("\\\"")
-      case '\\' => sb.append("\\\\")
-      case '\b' => sb.append("\\b")
-      case '\f' => sb.append("\\f")
-      case '\n' => sb.append("\\n")
-      case '\r' => sb.append("\\r")
-      case '\t' => sb.append("\\t")
-      case _ =>
-        if c < 0x20 then
-          sb.append("\\u00")
-          val hex = "0123456789abcdef"
-          sb.append(hex.charAt((c >> 4) & 0xf))
-          sb.append(hex.charAt(c & 0xf))
-        else sb.append(c)
-    i += 1
+  while i < n && !needsEscape(s.charAt(i)) do i += 1
+  if i == n then sb.append(s)
+  else
+    sb.append(s, 0, i)
+    while i < n do
+      val c = s.charAt(i)
+      c match
+        case '"' => sb.append("\\\"")
+        case '\\' => sb.append("\\\\")
+        case '\b' => sb.append("\\b")
+        case '\f' => sb.append("\\f")
+        case '\n' => sb.append("\\n")
+        case '\r' => sb.append("\\r")
+        case '\t' => sb.append("\\t")
+        case _ =>
+          if c < 0x20 then
+            sb.append("\\u00")
+            val hex = "0123456789abcdef"
+            sb.append(hex.charAt((c >> 4) & 0xf))
+            sb.append(hex.charAt(c & 0xf))
+          else sb.append(c)
+      i += 1
   sb.append('"')
 
 final class JsonOutput(sb: java.lang.StringBuilder) extends OutputAndSimpleOutput:

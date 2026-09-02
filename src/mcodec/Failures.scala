@@ -202,7 +202,7 @@ final class MapFieldReadFailed private[mcodec] (
   ): ReadFailure =
     new MapFieldReadFailed(reason, path, rootType, cause)
 
-inline def withSegment[A](seg: PathSegment)(inline body: A): A =
+inline def withSegment[A](inline seg: PathSegment)(inline body: A): A =
   try body
   catch case rf: ReadFailure => throw rf.prepend(seg)
 
