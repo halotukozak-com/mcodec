@@ -1,0 +1,8 @@
+/* Scaladoc's bundled theme ships a `.site-container img { max-width: 100% }`
+   rule, but nothing in the generated HTML carries that class (the content
+   wrapper is `#content`), so full-res images overflow the content column on
+   static-site pages. Constrain them here until it's fixed upstream. */
+#content img {
+  max-width: 100%;
+  height: auto;
+}
