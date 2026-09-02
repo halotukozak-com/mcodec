@@ -1,5 +1,7 @@
 ---
 title: Benchmarks
+extraCSS:
+  - css/site.css
 ---
 
 # Benchmarks
