@@ -255,6 +255,7 @@ class JsonInput(reader: JsonReader) extends InputAndSimpleInput:
 final class JsonListInput(reader: JsonReader) extends ListInput:
   private var started = false
   private var ended = false
+  private val elem = new JsonInput(reader)
 
   def hasNext: Boolean =
     if ended then false
@@ -271,13 +272,17 @@ final class JsonListInput(reader: JsonReader) extends ListInput:
       ended = true
       false
 
-  def nextElement(): Input = new JsonInput(reader)
+  def nextElement(): Input = elem
 
-final class JsonFieldInput(reader: JsonReader, val fieldName: String) extends JsonInput(reader), FieldInput
+final class JsonFieldInput(reader: JsonReader) extends JsonInput(reader), FieldInput:
+  // Mutable so JsonObjectInput can reuse one instance per object; a FieldInput is only
+  // valid until the next nextField()/hasNext() on its ObjectInput.
+  var fieldName: String = ""
 
 final class JsonObjectInput(reader: JsonReader) extends ObjectInput:
   private var started = false
   private var ended = false
+  private val field = new JsonFieldInput(reader)
 
   def hasNext: Boolean =
     if ended then false
@@ -297,7 +302,8 @@ final class JsonObjectInput(reader: JsonReader) extends ObjectInput:
   def nextField(): FieldInput =
     val name = reader.readRawString()
     reader.consume(':')
-    new JsonFieldInput(reader, name)
+    field.fieldName = name
+    field
 
   def getNextNamedField(name: String): FieldInput =
     val f = nextField()

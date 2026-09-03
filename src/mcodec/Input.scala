@@ -55,10 +55,19 @@ trait SequentialInput:
   def skipRemaining(): Unit
 
 trait ListInput extends SequentialInput:
+  /**
+   * The next element. Must be fully consumed before the next `nextElement()` / `hasNext` call —
+   * backends may hand back a single reused instance.
+   */
   def nextElement(): Input
   def skipRemaining(): Unit = while hasNext do nextElement().skip()
 
 trait ObjectInput extends SequentialInput:
+  /**
+   * The next field. The returned [[FieldInput]] must be fully consumed before the next
+   * `nextField()` / `hasNext` call — backends are free to hand back a single reused instance,
+   * so holding one across iteration steps is unsupported.
+   */
   def nextField(): FieldInput
   def peekField(name: String): Option[FieldInput] = None
   def getNextNamedField(name: String): FieldInput
