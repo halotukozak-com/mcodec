@@ -8,6 +8,6 @@ object Json:
     value
 
   def write[T: MCodec as codec](value: T): String =
-    val sb = new java.lang.StringBuilder
+    val sb = new java.lang.StringBuilder(512)
     codec.write(new JsonOutput(sb), value)
     sb.toString
