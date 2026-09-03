@@ -8,11 +8,15 @@
 //> using options -deprecation -feature -new-syntax -unchecked
 //> using options -language:noAutoTupling
 //> using options -Vprofile -Xprint-inline
-//> using options -Ycheck:macros -Ydebug-flags -Ydebug-missing-refs
+//> using options -Xcheck-macros -Ycheck:macros -Ydebug-flags -Ydebug-missing-refs
 //> using options -Ycheck:all
 //> using options -Yexplain-lowlevel -Yexplicit-nulls
 //> using options -Yshow-suppressed-errors -Yshow-var-bounds
 //> using options -Wsafe-init -Werror -Wunused:all
+// Dotty misreports the position of Product methods (canEqual, productArity, ...) as
+// 0 for locally-scoped case classes under -Xcheck-macros -- a compiler-internal
+// diagnostic bug, not a real code issue.
+//> using options "-Wconf:msg=Missing symbol position.*:s"
 ////> using options -Yprofile-enabled" -Yprofile-trace:debug/compile-trace.json"
 
 //> using publish.organization com.halotukozak
