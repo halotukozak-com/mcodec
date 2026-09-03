@@ -15,18 +15,16 @@ long it takes the compiler** to derive codecs, and **how fast those codecs run**
 
 ## Takeaways
 
-- **vs. GenCodec (the design mcodec copies): ahead on writes, level on reads.** `write` is 2.68M / 62k / 94k / 5.0k
-  against GenCodec's 2.77M / 54k / 83k / 3.9k — parity on Primitives, ahead everywhere else. `read` is within noise of
-  GenCodec on every model.
+- **vs. GenCodec (the design mcodec copies): ahead on writes, level on reads.** `write` is 3.2M / 64k / 95k / 5.0k
+  against GenCodec's 2.8M / 56k / 86k / 4.0k — ahead on every model. `read` is within noise of GenCodec on every model.
 - **Writes vs. the Scala 3 field: strong.** mcodec beats circe, play-json and borer on every model and is level with
   uPickle; only jsoniter-scala and zio-json are faster. On **reads** it sits with circe / uPickle / GenCodec and behind
   zio-json and borer — the recursive-ADT read is the one model where it trails the field.
 - **jsoniter-scala is its own league** — 2–5× everyone else on both axes.
-- **Compile time is the weak spot.** The `transparent inline` derivation is the
-  steepest-scaling in the group — ~9 s for 50 + 12 codecs (~13 s at N=100) vs.
-  ~5–8 s for the Scala 3 macro libraries and **~4 s for GenCodec's Scala 2 macro**
-  (≈2.3× mcodec's own ancestor). It also emits ~3.5× more bytecode than circe or
-  jsoniter. The cost is concentrated in the **typer** and **inlining** phases.
+- **Compile time is still the weak spot, but the gap has closed.** The `transparent inline` derivation is the
+  slowest-scaling Scala 3 library here — ~7.6 s for 50 + 12 codecs (~11 s at N=100) vs. ~6 s for circe / borer / zio-json
+  and **~4 s for GenCodec's Scala 2 macro**. Emitted bytecode roughly halved with `made` 0.6.0 (~2× circe now, and below
+  zio-json). The cost is concentrated in the **typer** and **inlining** phases.
 
 ## Libraries under test
 
@@ -75,14 +73,14 @@ _Throughput, ops/s (higher is better) — `write`._
 
 | library | Primitives | Company (nested) | Geometry (ADT) | Batch (collections) |
 | --- | --- | --- | --- | --- |
-| borer | 2,154,284 | 44,463 | 89,099 | 4,259 |
-| circe | 1,176,097 | 27,607 | 47,111 | 2,068 |
-| gencodec | 2,769,762 | 53,698 | 83,343 | 3,883 |
-| jsoniter | 9,460,077 | 124,316 | 180,647 | 7,170 |
-| mcodec | 2,677,377 | 62,407 | 93,546 | 4,956 |
-| play-json | 583,420 | 20,996 | n/a | 1,991 |
-| upickle | 3,075,142 | 61,777 | 91,892 | 3,839 |
-| zio-json | 5,239,481 | 98,183 | 145,846 | 7,277 |
+| borer | 2,176,347 | 44,045 | 89,533 | 4,316 |
+| circe | 1,213,181 | 27,798 | 49,041 | 1,983 |
+| gencodec | 2,838,994 | 55,908 | 85,934 | 4,021 |
+| jsoniter | 7,877,679 | 122,205 | 187,465 | 7,200 |
+| mcodec | 3,245,740 | 64,277 | 95,321 | 5,046 |
+| play-json | 599,903 | 21,565 | n/a | 2,039 |
+| upickle | 3,163,585 | 63,029 | 93,459 | 3,792 |
+| zio-json | 5,334,664 | 99,325 | 147,563 | 7,466 |
 <!-- BENCH:serde-write END -->
 
 <!-- BENCH:serde-read START -->
@@ -90,14 +88,14 @@ _Throughput, ops/s (higher is better) — `read`._
 
 | library | Primitives | Company (nested) | Geometry (ADT) | Batch (collections) |
 | --- | --- | --- | --- | --- |
-| borer | 2,947,058 | 44,065 | 46,352 | 3,438 |
-| circe | 871,773 | 21,114 | 29,887 | 1,917 |
-| gencodec | 951,710 | 22,108 | 29,039 | 1,979 |
-| jsoniter | 5,143,890 | 106,796 | 199,774 | 6,728 |
-| mcodec | 1,193,576 | 22,771 | 27,544 | 2,159 |
-| play-json | 703,554 | 12,913 | n/a | 1,324 |
-| upickle | 1,358,158 | 29,536 | 30,525 | 2,239 |
-| zio-json | 1,835,304 | 36,245 | 63,104 | 2,636 |
+| borer | 3,027,454 | 43,638 | 47,070 | 3,539 |
+| circe | 982,841 | 21,111 | 31,198 | 1,988 |
+| gencodec | 971,131 | 22,713 | 30,006 | 1,986 |
+| jsoniter | 5,102,527 | 104,825 | 195,359 | 7,038 |
+| mcodec | 1,179,259 | 22,433 | 28,018 | 2,141 |
+| play-json | 721,902 | 13,407 | n/a | 1,302 |
+| upickle | 1,384,755 | 29,870 | 31,289 | 2,260 |
+| zio-json | 1,980,901 | 35,340 | 62,445 | 2,633 |
 <!-- BENCH:serde-read END -->
 
 _Charts show throughput **relative to mcodec** on each model (mcodec = 1.0, taller is faster); absolute ops/s are in the tables above._
@@ -129,14 +127,14 @@ _Clean compile wall time, seconds (lower is better); last column is total emitte
 
 | library | N=0 | N=1 | N=10 | N=25 | N=50 | N=100 | bytecode @ N=100 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| borer | 1.0 | 1.8 | 3.3 | 4.8 | 6.4 | 8.9 | 3,459 KB |
-| circe | 1.0 | 1.9 | 3.4 | 4.9 | 6.4 | 9.4 | 2,507 KB |
-| gencodec ¹ | 0.9 | 1.3 | 2.4 | 3.2 | 4.0 | 5.4 | 3,122 KB |
-| jsoniter | 1.0 | 1.6 | 2.6 | 3.6 | 4.6 | 6.2 | 2,658 KB |
-| mcodec | 1.0 | 2.0 | 4.2 | 6.4 | 9.0 | 13.4 | 9,105 KB |
-| play-json | 1.0 | 1.9 | 2.8 | 3.6 | 4.7 | 6.2 | 2,432 KB |
-| upickle | 1.0 | 2.3 | 3.9 | 5.6 | 7.5 | 11.1 | 4,639 KB |
-| zio-json | 1.0 | 1.8 | 3.4 | 4.9 | 6.5 | 9.3 | 5,306 KB |
+| borer | 0.9 | 1.6 | 3.0 | 4.4 | 5.9 | 8.3 | 3,459 KB |
+| circe | 0.9 | 1.7 | 3.0 | 4.4 | 5.9 | 8.5 | 2,507 KB |
+| gencodec ¹ | 0.8 | 1.2 | 2.1 | 2.8 | 3.7 | 4.9 | 3,122 KB |
+| jsoniter | 0.9 | 1.5 | 2.4 | 3.2 | 4.2 | 5.7 | 2,658 KB |
+| mcodec | 0.9 | 1.8 | 3.7 | 5.5 | 7.6 | 11.1 | 4,986 KB |
+| play-json | 0.9 | 1.7 | 2.5 | 3.3 | 4.2 | 5.7 | 2,432 KB |
+| upickle | 1.0 | 2.2 | 3.6 | 5.2 | 6.8 | 10.0 | 4,639 KB |
+| zio-json | 0.9 | 1.7 | 3.1 | 4.4 | 5.9 | 8.5 | 5,306 KB |
 
 ¹ GenCodec is compiled by **Scala 2.13.18**, not the Scala 3 compiler — a cross-ecosystem data point, not a like-for-like measurement.
 
@@ -146,16 +144,17 @@ _Seconds per scalac phase for the N=50 project. Macro / mirror derivation and `i
 
 | library | parser | typer | posttyper | inlining | erasure | genBCode | typer+inlining |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| borer | 0.07 | 0.67 | 0.26 | 2.70 | 0.49 | 0.57 | **3.37** |
-| circe | 0.07 | 0.76 | 0.26 | 3.15 | 0.34 | 0.53 | **3.91** |
-| jsoniter | 0.08 | 0.71 | 0.30 | 1.38 | 0.35 | 0.48 | **2.08** |
-| mcodec | 0.07 | 1.96 | 0.27 | 3.30 | 0.56 | 1.01 | **5.25** |
-| play-json | 0.06 | 0.52 | 0.23 | 1.62 | 0.34 | 0.49 | **2.14** |
-| upickle | 0.08 | 1.12 | 0.23 | 3.47 | 0.42 | 0.58 | **4.59** |
-| zio-json | 0.07 | 0.79 | 0.24 | 2.12 | 0.53 | 0.77 | **2.91** |
+| borer | 0.07 | 0.59 | 0.22 | 2.49 | 0.43 | 0.54 | **3.08** |
+| circe | 0.07 | 0.68 | 0.22 | 2.80 | 0.32 | 0.49 | **3.48** |
+| jsoniter | 0.07 | 0.59 | 0.21 | 1.25 | 0.34 | 0.45 | **1.85** |
+| mcodec | 0.07 | 1.51 | 0.26 | 3.13 | 0.52 | 0.59 | **4.64** |
+| play-json | 0.06 | 0.47 | 0.21 | 1.40 | 0.29 | 0.45 | **1.87** |
+| upickle | 0.07 | 0.99 | 0.20 | 3.03 | 0.37 | 0.53 | **4.02** |
+| zio-json | 0.07 | 0.71 | 0.22 | 1.98 | 0.48 | 0.71 | **2.70** |
 <!-- BENCH:compile END -->
 
 ![compile scaling](images/benchmarks/compile-scaling.png)
+![generated bytecode](images/benchmarks/bytecode-scaling.png)
 ![compile phases](images/benchmarks/compile-phases.png)
 
 ## Caveats
@@ -166,7 +165,7 @@ _Seconds per scalac phase for the N=50 project. Macro / mirror derivation and `i
   `String`-only, so the whole matrix uses `String`. This understates the byte-native libraries (jsoniter-scala, borer),
   which are built for
   `Array[Byte]` and pay a UTF-8 conversion here.
-- **Scala 3.9.0 (Scala Next).** mcodec pins 3.9.0 via Made 0.4.1. Every competitor is published for 3.3 LTS and consumed
+- **Scala 3.9.0 (Scala Next).** mcodec pins 3.9.0 via Made 0.6.0. Every competitor is published for 3.3 LTS and consumed
   here via TASTy forward-compatibility; a native 3.9.0 build of each might differ slightly.
 - **Default configuration.** Each library uses its out-of-the-box derivation with no hand-tuning (no jsoniter
   `CodecMakerConfig` beyond recursion, no circe
@@ -184,7 +183,7 @@ _Seconds per scalac phase for the N=50 project. Macro / mirror derivation and `i
 Committed run:
 
 ```
-date:      2026-09-02
+date:      2026-09-03
 cpu:       Apple M4 Pro
 ram:       48 GB
 os:        macOS 26.6.1 (25G76)
