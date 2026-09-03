@@ -163,6 +163,7 @@ final class CborListOutput(out: ByteArrayOutputStream) extends ListOutput:
   private var declared = -1
   private var headerWritten = false
   override def declareSize(size: Int): Unit = declared = size
+  override def wantsDeclaredSize: Boolean = true
   private def ensureHeader(): Unit =
     if !headerWritten then
       if declared >= 0 then writeMajor(out, 4, declared.toLong)
@@ -179,6 +180,7 @@ final class CborObjectOutput(out: ByteArrayOutputStream) extends ObjectOutput:
   private var declared = -1
   private var headerWritten = false
   override def declareSize(size: Int): Unit = declared = size
+  override def wantsDeclaredSize: Boolean = true
   private def ensureHeader(): Unit =
     if !headerWritten then
       if declared >= 0 then writeMajor(out, 5, declared.toLong)
