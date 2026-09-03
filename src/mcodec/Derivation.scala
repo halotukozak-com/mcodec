@@ -8,7 +8,7 @@ import scala.annotation.nowarn
 
 trait Derivation:
   this: MCodec.type =>
-  transparent inline def deriveDispatch[T](m: Made.Of[T]): MCodec[T] = inline m match
+  inline def deriveDispatch[T](m: Made.Of[T]): MCodec[T] = inline m match
     case pm: Made.ProductOf[T] => deriveProduct[T](pm)
     case sm: Made.SumOf[T] => deriveSum[T](sm)
     case tm: Made.TransparentOf[T] => deriveTransparent[T](tm)
