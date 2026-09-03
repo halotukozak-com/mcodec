@@ -16,8 +16,9 @@ jobs:
         uses: coursier/cache-action@v8.1
       - uses: VirtusLab/scala-cli-setup@v1
       - name: Check formatting
-        # benchmark/ is a separate scala-cli build (competitor deps, JMH) — its
-        # own CI is .github/workflows/benchmark.yml.
+        # benchmark/ is a separate scala-cli build (competitor deps, JMH) —
+        # excluded here even for repos without one, since --exclude is a
+        # no-op glob filter when nothing matches.
         run: scala-cli --power fmt --check . --exclude benchmark
 
   test:
