@@ -1,11 +1,10 @@
-//> using target.platform jvm
-
 package halotukozak.mcodec
 
 // Scala.js represents Float as a Double under the hood (no native 32-bit float
 // type), so it doesn't preserve exact Float bit patterns: values can drift
 // through Double precision, and -0.0f loses its sign bit. Both are genuine
-// Scala.js runtime limitations, not bugs in this codebase — kept JVM-only.
+// Scala.js runtime limitations, not bugs in this codebase — kept JVM-only by
+// living under test/src-jvm, which only the jvm test module compiles.
 // See https://github.com/halotukozak-com/mcodec/issues/23
 class IoContractExtJvmOnlyTest extends munit.FunSuite:
 

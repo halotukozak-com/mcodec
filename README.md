@@ -91,22 +91,24 @@ val nullableInt: MCodec[Int | Null] = MCodec[Int].nullable
 
 ## Build
 
+Built with [Mill](https://mill-build.org):
+
 ```sh
-scala-cli --power compile . --exclude benchmark
-scala-cli --power test . --exclude benchmark
-scala-cli --power fmt .
+./mill jvm.compile
+./mill jvm.test
+./mill mill.scalalib.scalafmt/checkFormatAll
 ```
 
-`--exclude benchmark` keeps the separate benchmark build (competitor deps, JMH)
-out of the library build — `scala-cli` has no directive for this.
+Replace `jvm` with `js` or `native` to build the other platforms. The `benchmark` module (competitor deps, JMH) is a
+separate top-level module — it's never pulled in by these.
 
 ## Benchmarks
 
 The [benchmarks guide](https://mcodec.halotukozak.com/docs/benchmarks.html) compares mcodec's **compile time** and
 **serialization throughput** against circe, jsoniter-scala, uPickle, zio-json, borer, play-json and AVSystem GenCodec
 (the design mcodec is modelled on). The suite lives in
-[`benchmark/`](https://github.com/halotukozak-com/mcodec/tree/main/benchmark) (a separate scala-cli build) and is
-regenerated with `benchmark/scripts/run_all.sh`.
+[`benchmark/`](https://github.com/halotukozak-com/mcodec/tree/main/benchmark) (a separate Mill module, `gencodec` a
+further nested Scala 2.13 one) and is regenerated with `./mill benchmark.runAll` (`--mode quick` for a fast pass).
 
 ## Documentation
 
