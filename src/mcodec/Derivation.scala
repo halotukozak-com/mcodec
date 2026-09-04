@@ -24,10 +24,10 @@ trait Derivation:
       m.elems
         .mapAs[MadeFieldElem][[e] =>> Any | NotExists]([e <: MadeFieldElem] => elem => elem.default)
         .toArrayOf[Any | NotExists],
-      optionalFlags.toArray.map(_.asInstanceOf[Boolean]),
+      optionalFlags.toArrayOf[Boolean](using containsOnly.refl),
       isOptionFlags[m.ElemTypes].toArray,
-      transientDefaultFlags.toArray.map(_.asInstanceOf[Boolean]),
-      outOfOrderFlags.toArray.map(_.asInstanceOf[Boolean]),
+      transientDefaultFlags.toArrayOf[Boolean](using containsOnly.refl),
+      outOfOrderFlags.toArrayOf[Boolean](using containsOnly.refl),
       m.fromUnsafeArray,
       compiletime
         .constValueTuple[Tuple.Map[m.GeneratedElems, MadeElem.ExtractLabel]]
