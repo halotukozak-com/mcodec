@@ -275,11 +275,11 @@ final class JsonListInput(reader: JsonReader) extends ListInput:
   def nextElement(): Input = elem
 
 final class JsonFieldInput(reader: JsonReader) extends JsonInput(reader), FieldInput:
-  // Mutable (package-private setter) so JsonObjectInput can reuse one instance per object;
-  // a FieldInput is only valid until the next nextField()/hasNext() on its ObjectInput.
-  private var _fieldName: String = ""
-  def fieldName: String = _fieldName
-  private[mcodec] def fieldName_=(name: String): Unit = _fieldName = name
+  // Mutable so JsonObjectInput can reuse one instance per object; a FieldInput is only
+  // valid until the next nextField()/hasNext() on its ObjectInput. A restricted-visibility
+  // setter would still compile to a public method (Scala's private[X] is source-level only),
+  // so there's no real bytecode-level benefit to splitting it — keep it a plain var.
+  var fieldName: String = ""
 
 final class JsonObjectInput(reader: JsonReader) extends ObjectInput:
   private var started = false
