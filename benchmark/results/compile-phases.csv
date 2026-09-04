@@ -1,148 +1,148 @@
 library,phase,seconds
-mcodec,inlining,3.1333
-mcodec,typer,1.5114
-mcodec,genBCode,0.5888
-mcodec,erasure,0.5184
-mcodec,posttyper,0.2641
-mcodec,"MegaPhase{elimErasedValueType, pureStats, vcElideAllocations, etaReduce, arrayApply, elimPolyFunction, tailrec, completeJavaEnums, mixin, lazyVals, memoize, nonLocalReturns, capturedVars}",0.1841
-mcodec,"MegaPhase{protectedAccessors, extmethods, uncacheGivenAliases, checkStatic, elimByName, hoistSuperArgs, forwardDepChecks, specializeApplyMethods, tryCatchPatterns, patternMatcher}",0.1809
-mcodec,"MegaPhase{crossVersionChecks, firstTransform, checkReentrant, elimPackagePrefixes, cookComments, checkLoopingImplicits, betaReduce, inlineVals, expandSAMs, elimRepeated, refchecks, dropForMap}",0.1806
-mcodec,pickler,0.1169
-mcodec,"MegaPhase{lambdaLift, elimStaticThis, countOuterAccesses}",0.0860
-mcodec,"MegaPhase{pruneErasedDefs, uninitialized, inlinePatterns, vcInlineMethods, seqLiterals, intercepted, getters, specializeFunctions, specializeTuples, collectNullableFields, elimOuterSelect, resolveSuper, functionXXLForwarders, paramForwarding, genericTuples, letOverApply, arrayConstructors}",0.0787
-mcodec,parser,0.0664
-mcodec,splicing,0.0613
-mcodec,staging,0.0610
-mcodec,pickleQuotes,0.0445
-mcodec,"MegaPhase{dropOuterAccessors, dropParentRefinements, checkNoSuperThis, flatten, transformWildcards, moveStatic, expandPrivate, restoreScopes, selectStatic, repeatableAnnotations}",0.0435
-mcodec,"MegaPhase{elimOpaque, explicitOuter, explicitSelf, interpolators, dropBreaks}",0.0387
-mcodec,constructors,0.0269
+mcodec,inlining,2.5611
+mcodec,typer,1.4302
+mcodec,genBCode,0.4823
+mcodec,erasure,0.3808
+mcodec,posttyper,0.1999
+mcodec,"MegaPhase{crossVersionChecks, firstTransform, checkReentrant, elimPackagePrefixes, cookComments, checkLoopingImplicits, betaReduce, inlineVals, expandSAMs, elimRepeated, refchecks, dropForMap}",0.1941
+mcodec,"MegaPhase{elimErasedValueType, pureStats, vcElideAllocations, etaReduce, arrayApply, elimPolyFunction, tailrec, completeJavaEnums, mixin, lazyVals, memoize, nonLocalReturns, capturedVars}",0.1787
+mcodec,"MegaPhase{protectedAccessors, extmethods, uncacheGivenAliases, checkStatic, elimByName, hoistSuperArgs, forwardDepChecks, specializeApplyMethods, tryCatchPatterns, patternMatcher}",0.1507
+mcodec,pickler,0.1149
+mcodec,"MegaPhase{lambdaLift, elimStaticThis, countOuterAccesses}",0.0740
+mcodec,"MegaPhase{pruneErasedDefs, uninitialized, inlinePatterns, vcInlineMethods, seqLiterals, intercepted, getters, specializeFunctions, specializeTuples, collectNullableFields, elimOuterSelect, resolveSuper, functionXXLForwarders, paramForwarding, genericTuples, letOverApply, arrayConstructors}",0.0666
+mcodec,parser,0.0663
+mcodec,splicing,0.0540
+mcodec,"MegaPhase{elimOpaque, explicitOuter, explicitSelf, interpolators, dropBreaks}",0.0463
+mcodec,staging,0.0440
+mcodec,"MegaPhase{dropOuterAccessors, dropParentRefinements, checkNoSuperThis, flatten, transformWildcards, moveStatic, expandPrivate, restoreScopes, selectStatic, repeatableAnnotations}",0.0358
+mcodec,constructors,0.0273
+mcodec,pickleQuotes,0.0254
 mcodec,inlinedPositions,0.0002
+mcodec,postInlining,0.0002
 mcodec,unrollDefs,0.0001
-mcodec,postInlining,0.0001
-circe,inlining,2.8001
-circe,typer,0.6823
-circe,genBCode,0.4932
-circe,erasure,0.3172
-circe,posttyper,0.2161
-circe,"MegaPhase{elimErasedValueType, pureStats, vcElideAllocations, etaReduce, arrayApply, elimPolyFunction, tailrec, completeJavaEnums, mixin, lazyVals, memoize, nonLocalReturns, capturedVars}",0.1549
-circe,"MegaPhase{crossVersionChecks, firstTransform, checkReentrant, elimPackagePrefixes, cookComments, checkLoopingImplicits, betaReduce, inlineVals, expandSAMs, elimRepeated, refchecks, dropForMap}",0.1486
-circe,"MegaPhase{protectedAccessors, extmethods, uncacheGivenAliases, checkStatic, elimByName, hoistSuperArgs, forwardDepChecks, specializeApplyMethods, tryCatchPatterns, patternMatcher}",0.1082
-circe,pickler,0.0902
-circe,"MegaPhase{lambdaLift, elimStaticThis, countOuterAccesses}",0.0706
-circe,parser,0.0658
-circe,"MegaPhase{pruneErasedDefs, uninitialized, inlinePatterns, vcInlineMethods, seqLiterals, intercepted, getters, specializeFunctions, specializeTuples, collectNullableFields, elimOuterSelect, resolveSuper, functionXXLForwarders, paramForwarding, genericTuples, letOverApply, arrayConstructors}",0.0391
-circe,"MegaPhase{dropOuterAccessors, dropParentRefinements, checkNoSuperThis, flatten, transformWildcards, moveStatic, expandPrivate, restoreScopes, selectStatic, repeatableAnnotations}",0.0347
+circe,inlining,2.9713
+circe,typer,0.6779
+circe,genBCode,0.4985
+circe,erasure,0.3042
+circe,posttyper,0.2215
+circe,"MegaPhase{elimErasedValueType, pureStats, vcElideAllocations, etaReduce, arrayApply, elimPolyFunction, tailrec, completeJavaEnums, mixin, lazyVals, memoize, nonLocalReturns, capturedVars}",0.1564
+circe,"MegaPhase{crossVersionChecks, firstTransform, checkReentrant, elimPackagePrefixes, cookComments, checkLoopingImplicits, betaReduce, inlineVals, expandSAMs, elimRepeated, refchecks, dropForMap}",0.1444
+circe,"MegaPhase{protectedAccessors, extmethods, uncacheGivenAliases, checkStatic, elimByName, hoistSuperArgs, forwardDepChecks, specializeApplyMethods, tryCatchPatterns, patternMatcher}",0.1103
+circe,pickler,0.0925
+circe,"MegaPhase{lambdaLift, elimStaticThis, countOuterAccesses}",0.0688
+circe,parser,0.0661
+circe,"MegaPhase{pruneErasedDefs, uninitialized, inlinePatterns, vcInlineMethods, seqLiterals, intercepted, getters, specializeFunctions, specializeTuples, collectNullableFields, elimOuterSelect, resolveSuper, functionXXLForwarders, paramForwarding, genericTuples, letOverApply, arrayConstructors}",0.0397
+circe,"MegaPhase{dropOuterAccessors, dropParentRefinements, checkNoSuperThis, flatten, transformWildcards, moveStatic, expandPrivate, restoreScopes, selectStatic, repeatableAnnotations}",0.0345
 circe,splicing,0.0343
-circe,pickleQuotes,0.0328
-circe,constructors,0.0251
-circe,"MegaPhase{elimOpaque, explicitOuter, explicitSelf, interpolators, dropBreaks}",0.0251
-circe,staging,0.0170
+circe,pickleQuotes,0.0331
+circe,"MegaPhase{elimOpaque, explicitOuter, explicitSelf, interpolators, dropBreaks}",0.0257
+circe,constructors,0.0244
+circe,staging,0.0171
 circe,inlinedPositions,0.0002
 circe,postInlining,0.0001
 circe,unrollDefs,0.0001
-jsoniter,inlining,1.2537
-jsoniter,typer,0.5914
-jsoniter,genBCode,0.4473
-jsoniter,erasure,0.3391
-jsoniter,posttyper,0.2140
-jsoniter,"MegaPhase{elimErasedValueType, pureStats, vcElideAllocations, etaReduce, arrayApply, elimPolyFunction, tailrec, completeJavaEnums, mixin, lazyVals, memoize, nonLocalReturns, capturedVars}",0.1473
-jsoniter,"MegaPhase{crossVersionChecks, firstTransform, checkReentrant, elimPackagePrefixes, cookComments, checkLoopingImplicits, betaReduce, inlineVals, expandSAMs, elimRepeated, refchecks, dropForMap}",0.1457
-jsoniter,"MegaPhase{protectedAccessors, extmethods, uncacheGivenAliases, checkStatic, elimByName, hoistSuperArgs, forwardDepChecks, specializeApplyMethods, tryCatchPatterns, patternMatcher}",0.1190
-jsoniter,pickler,0.1042
-jsoniter,parser,0.0688
-jsoniter,"MegaPhase{lambdaLift, elimStaticThis, countOuterAccesses}",0.0553
-jsoniter,"MegaPhase{dropOuterAccessors, dropParentRefinements, checkNoSuperThis, flatten, transformWildcards, moveStatic, expandPrivate, restoreScopes, selectStatic, repeatableAnnotations}",0.0419
-jsoniter,"MegaPhase{pruneErasedDefs, uninitialized, inlinePatterns, vcInlineMethods, seqLiterals, intercepted, getters, specializeFunctions, specializeTuples, collectNullableFields, elimOuterSelect, resolveSuper, functionXXLForwarders, paramForwarding, genericTuples, letOverApply, arrayConstructors}",0.0387
-jsoniter,splicing,0.0323
-jsoniter,pickleQuotes,0.0301
-jsoniter,constructors,0.0281
-jsoniter,"MegaPhase{elimOpaque, explicitOuter, explicitSelf, interpolators, dropBreaks}",0.0247
-jsoniter,staging,0.0163
+jsoniter,inlining,1.2448
+jsoniter,typer,0.5932
+jsoniter,genBCode,0.4488
+jsoniter,erasure,0.3386
+jsoniter,posttyper,0.2113
+jsoniter,"MegaPhase{elimErasedValueType, pureStats, vcElideAllocations, etaReduce, arrayApply, elimPolyFunction, tailrec, completeJavaEnums, mixin, lazyVals, memoize, nonLocalReturns, capturedVars}",0.1436
+jsoniter,"MegaPhase{crossVersionChecks, firstTransform, checkReentrant, elimPackagePrefixes, cookComments, checkLoopingImplicits, betaReduce, inlineVals, expandSAMs, elimRepeated, refchecks, dropForMap}",0.1414
+jsoniter,"MegaPhase{protectedAccessors, extmethods, uncacheGivenAliases, checkStatic, elimByName, hoistSuperArgs, forwardDepChecks, specializeApplyMethods, tryCatchPatterns, patternMatcher}",0.1172
+jsoniter,pickler,0.0914
+jsoniter,parser,0.0686
+jsoniter,"MegaPhase{lambdaLift, elimStaticThis, countOuterAccesses}",0.0637
+jsoniter,"MegaPhase{pruneErasedDefs, uninitialized, inlinePatterns, vcInlineMethods, seqLiterals, intercepted, getters, specializeFunctions, specializeTuples, collectNullableFields, elimOuterSelect, resolveSuper, functionXXLForwarders, paramForwarding, genericTuples, letOverApply, arrayConstructors}",0.0385
+jsoniter,splicing,0.0327
+jsoniter,constructors,0.0327
+jsoniter,pickleQuotes,0.0293
+jsoniter,"MegaPhase{dropOuterAccessors, dropParentRefinements, checkNoSuperThis, flatten, transformWildcards, moveStatic, expandPrivate, restoreScopes, selectStatic, repeatableAnnotations}",0.0257
+jsoniter,"MegaPhase{elimOpaque, explicitOuter, explicitSelf, interpolators, dropBreaks}",0.0236
+jsoniter,staging,0.0165
 jsoniter,inlinedPositions,0.0002
-jsoniter,unrollDefs,0.0001
 jsoniter,postInlining,0.0001
-upickle,inlining,3.0302
-upickle,typer,0.9927
-upickle,genBCode,0.5294
-upickle,erasure,0.3656
-upickle,"MegaPhase{crossVersionChecks, firstTransform, checkReentrant, elimPackagePrefixes, cookComments, checkLoopingImplicits, betaReduce, inlineVals, expandSAMs, elimRepeated, refchecks, dropForMap}",0.2118
-upickle,"MegaPhase{elimErasedValueType, pureStats, vcElideAllocations, etaReduce, arrayApply, elimPolyFunction, tailrec, completeJavaEnums, mixin, lazyVals, memoize, nonLocalReturns, capturedVars}",0.2060
-upickle,posttyper,0.1959
-upickle,"MegaPhase{protectedAccessors, extmethods, uncacheGivenAliases, checkStatic, elimByName, hoistSuperArgs, forwardDepChecks, specializeApplyMethods, tryCatchPatterns, patternMatcher}",0.1506
-upickle,"MegaPhase{lambdaLift, elimStaticThis, countOuterAccesses}",0.0935
-upickle,pickler,0.0836
-upickle,parser,0.0689
-upickle,"MegaPhase{dropOuterAccessors, dropParentRefinements, checkNoSuperThis, flatten, transformWildcards, moveStatic, expandPrivate, restoreScopes, selectStatic, repeatableAnnotations}",0.0430
-upickle,"MegaPhase{pruneErasedDefs, uninitialized, inlinePatterns, vcInlineMethods, seqLiterals, intercepted, getters, specializeFunctions, specializeTuples, collectNullableFields, elimOuterSelect, resolveSuper, functionXXLForwarders, paramForwarding, genericTuples, letOverApply, arrayConstructors}",0.0422
-upickle,splicing,0.0403
-upickle,"MegaPhase{elimOpaque, explicitOuter, explicitSelf, interpolators, dropBreaks}",0.0326
-upickle,constructors,0.0322
-upickle,pickleQuotes,0.0275
-upickle,staging,0.0196
+jsoniter,unrollDefs,0.0001
+upickle,inlining,3.0299
+upickle,typer,0.9987
+upickle,genBCode,0.5254
+upickle,erasure,0.3694
+upickle,"MegaPhase{crossVersionChecks, firstTransform, checkReentrant, elimPackagePrefixes, cookComments, checkLoopingImplicits, betaReduce, inlineVals, expandSAMs, elimRepeated, refchecks, dropForMap}",0.2434
+upickle,posttyper,0.2057
+upickle,"MegaPhase{elimErasedValueType, pureStats, vcElideAllocations, etaReduce, arrayApply, elimPolyFunction, tailrec, completeJavaEnums, mixin, lazyVals, memoize, nonLocalReturns, capturedVars}",0.1975
+upickle,"MegaPhase{protectedAccessors, extmethods, uncacheGivenAliases, checkStatic, elimByName, hoistSuperArgs, forwardDepChecks, specializeApplyMethods, tryCatchPatterns, patternMatcher}",0.1161
+upickle,pickler,0.1000
+upickle,"MegaPhase{lambdaLift, elimStaticThis, countOuterAccesses}",0.0955
+upickle,parser,0.0703
+upickle,"MegaPhase{dropOuterAccessors, dropParentRefinements, checkNoSuperThis, flatten, transformWildcards, moveStatic, expandPrivate, restoreScopes, selectStatic, repeatableAnnotations}",0.0429
+upickle,"MegaPhase{pruneErasedDefs, uninitialized, inlinePatterns, vcInlineMethods, seqLiterals, intercepted, getters, specializeFunctions, specializeTuples, collectNullableFields, elimOuterSelect, resolveSuper, functionXXLForwarders, paramForwarding, genericTuples, letOverApply, arrayConstructors}",0.0421
+upickle,splicing,0.0408
+upickle,pickleQuotes,0.0379
+upickle,"MegaPhase{elimOpaque, explicitOuter, explicitSelf, interpolators, dropBreaks}",0.0348
+upickle,constructors,0.0328
+upickle,staging,0.0204
 upickle,inlinedPositions,0.0002
-upickle,postInlining,0.0001
 upickle,unrollDefs,0.0001
-zio-json,inlining,1.9832
-zio-json,typer,0.7126
-zio-json,genBCode,0.7085
-zio-json,erasure,0.4790
-zio-json,"MegaPhase{elimErasedValueType, pureStats, vcElideAllocations, etaReduce, arrayApply, elimPolyFunction, tailrec, completeJavaEnums, mixin, lazyVals, memoize, nonLocalReturns, capturedVars}",0.2473
-zio-json,posttyper,0.2203
-zio-json,"MegaPhase{crossVersionChecks, firstTransform, checkReentrant, elimPackagePrefixes, cookComments, checkLoopingImplicits, betaReduce, inlineVals, expandSAMs, elimRepeated, refchecks, dropForMap}",0.2176
-zio-json,"MegaPhase{protectedAccessors, extmethods, uncacheGivenAliases, checkStatic, elimByName, hoistSuperArgs, forwardDepChecks, specializeApplyMethods, tryCatchPatterns, patternMatcher}",0.2030
-zio-json,"MegaPhase{lambdaLift, elimStaticThis, countOuterAccesses}",0.1236
-zio-json,pickler,0.0972
-zio-json,"MegaPhase{pruneErasedDefs, uninitialized, inlinePatterns, vcInlineMethods, seqLiterals, intercepted, getters, specializeFunctions, specializeTuples, collectNullableFields, elimOuterSelect, resolveSuper, functionXXLForwarders, paramForwarding, genericTuples, letOverApply, arrayConstructors}",0.0708
-zio-json,parser,0.0655
-zio-json,staging,0.0586
-zio-json,splicing,0.0481
-zio-json,pickleQuotes,0.0451
-zio-json,"MegaPhase{dropOuterAccessors, dropParentRefinements, checkNoSuperThis, flatten, transformWildcards, moveStatic, expandPrivate, restoreScopes, selectStatic, repeatableAnnotations}",0.0450
-zio-json,"MegaPhase{elimOpaque, explicitOuter, explicitSelf, interpolators, dropBreaks}",0.0449
-zio-json,constructors,0.0268
+upickle,postInlining,0.0001
+zio-json,inlining,1.9697
+zio-json,genBCode,0.7302
+zio-json,typer,0.6955
+zio-json,erasure,0.4791
+zio-json,"MegaPhase{elimErasedValueType, pureStats, vcElideAllocations, etaReduce, arrayApply, elimPolyFunction, tailrec, completeJavaEnums, mixin, lazyVals, memoize, nonLocalReturns, capturedVars}",0.2335
+zio-json,"MegaPhase{crossVersionChecks, firstTransform, checkReentrant, elimPackagePrefixes, cookComments, checkLoopingImplicits, betaReduce, inlineVals, expandSAMs, elimRepeated, refchecks, dropForMap}",0.2231
+zio-json,posttyper,0.2150
+zio-json,"MegaPhase{protectedAccessors, extmethods, uncacheGivenAliases, checkStatic, elimByName, hoistSuperArgs, forwardDepChecks, specializeApplyMethods, tryCatchPatterns, patternMatcher}",0.2010
+zio-json,"MegaPhase{lambdaLift, elimStaticThis, countOuterAccesses}",0.1212
+zio-json,pickler,0.0912
+zio-json,"MegaPhase{pruneErasedDefs, uninitialized, inlinePatterns, vcInlineMethods, seqLiterals, intercepted, getters, specializeFunctions, specializeTuples, collectNullableFields, elimOuterSelect, resolveSuper, functionXXLForwarders, paramForwarding, genericTuples, letOverApply, arrayConstructors}",0.0726
+zio-json,parser,0.0656
+zio-json,staging,0.0535
+zio-json,"MegaPhase{dropOuterAccessors, dropParentRefinements, checkNoSuperThis, flatten, transformWildcards, moveStatic, expandPrivate, restoreScopes, selectStatic, repeatableAnnotations}",0.0489
+zio-json,splicing,0.0470
+zio-json,pickleQuotes,0.0445
+zio-json,"MegaPhase{elimOpaque, explicitOuter, explicitSelf, interpolators, dropBreaks}",0.0443
+zio-json,constructors,0.0310
 zio-json,inlinedPositions,0.0002
-zio-json,postInlining,0.0001
 zio-json,unrollDefs,0.0001
-borer,inlining,2.4886
-borer,typer,0.5932
-borer,genBCode,0.5362
-borer,erasure,0.4321
-borer,posttyper,0.2233
-borer,"MegaPhase{elimErasedValueType, pureStats, vcElideAllocations, etaReduce, arrayApply, elimPolyFunction, tailrec, completeJavaEnums, mixin, lazyVals, memoize, nonLocalReturns, capturedVars}",0.1972
-borer,"MegaPhase{crossVersionChecks, firstTransform, checkReentrant, elimPackagePrefixes, cookComments, checkLoopingImplicits, betaReduce, inlineVals, expandSAMs, elimRepeated, refchecks, dropForMap}",0.1729
-borer,"MegaPhase{lambdaLift, elimStaticThis, countOuterAccesses}",0.1312
-borer,"MegaPhase{protectedAccessors, extmethods, uncacheGivenAliases, checkStatic, elimByName, hoistSuperArgs, forwardDepChecks, specializeApplyMethods, tryCatchPatterns, patternMatcher}",0.1245
-borer,pickler,0.0923
-borer,staging,0.0734
-borer,parser,0.0666
-borer,splicing,0.0645
-borer,pickleQuotes,0.0597
-borer,"MegaPhase{pruneErasedDefs, uninitialized, inlinePatterns, vcInlineMethods, seqLiterals, intercepted, getters, specializeFunctions, specializeTuples, collectNullableFields, elimOuterSelect, resolveSuper, functionXXLForwarders, paramForwarding, genericTuples, letOverApply, arrayConstructors}",0.0532
-borer,"MegaPhase{dropOuterAccessors, dropParentRefinements, checkNoSuperThis, flatten, transformWildcards, moveStatic, expandPrivate, restoreScopes, selectStatic, repeatableAnnotations}",0.0418
-borer,"MegaPhase{elimOpaque, explicitOuter, explicitSelf, interpolators, dropBreaks}",0.0343
-borer,constructors,0.0279
+zio-json,postInlining,0.0001
+borer,inlining,2.4467
+borer,typer,0.6145
+borer,genBCode,0.5650
+borer,erasure,0.4462
+borer,posttyper,0.2273
+borer,"MegaPhase{elimErasedValueType, pureStats, vcElideAllocations, etaReduce, arrayApply, elimPolyFunction, tailrec, completeJavaEnums, mixin, lazyVals, memoize, nonLocalReturns, capturedVars}",0.2076
+borer,"MegaPhase{crossVersionChecks, firstTransform, checkReentrant, elimPackagePrefixes, cookComments, checkLoopingImplicits, betaReduce, inlineVals, expandSAMs, elimRepeated, refchecks, dropForMap}",0.1727
+borer,"MegaPhase{lambdaLift, elimStaticThis, countOuterAccesses}",0.1372
+borer,"MegaPhase{protectedAccessors, extmethods, uncacheGivenAliases, checkStatic, elimByName, hoistSuperArgs, forwardDepChecks, specializeApplyMethods, tryCatchPatterns, patternMatcher}",0.1207
+borer,pickler,0.0894
+borer,staging,0.0702
+borer,parser,0.0689
+borer,splicing,0.0639
+borer,pickleQuotes,0.0560
+borer,"MegaPhase{pruneErasedDefs, uninitialized, inlinePatterns, vcInlineMethods, seqLiterals, intercepted, getters, specializeFunctions, specializeTuples, collectNullableFields, elimOuterSelect, resolveSuper, functionXXLForwarders, paramForwarding, genericTuples, letOverApply, arrayConstructors}",0.0555
+borer,"MegaPhase{dropOuterAccessors, dropParentRefinements, checkNoSuperThis, flatten, transformWildcards, moveStatic, expandPrivate, restoreScopes, selectStatic, repeatableAnnotations}",0.0431
+borer,"MegaPhase{elimOpaque, explicitOuter, explicitSelf, interpolators, dropBreaks}",0.0318
+borer,constructors,0.0299
 borer,inlinedPositions,0.0002
 borer,unrollDefs,0.0001
 borer,postInlining,0.0001
-play-json,inlining,1.3993
-play-json,typer,0.4689
-play-json,genBCode,0.4499
-play-json,erasure,0.2895
-play-json,posttyper,0.2051
-play-json,"MegaPhase{elimErasedValueType, pureStats, vcElideAllocations, etaReduce, arrayApply, elimPolyFunction, tailrec, completeJavaEnums, mixin, lazyVals, memoize, nonLocalReturns, capturedVars}",0.1968
-play-json,"MegaPhase{crossVersionChecks, firstTransform, checkReentrant, elimPackagePrefixes, cookComments, checkLoopingImplicits, betaReduce, inlineVals, expandSAMs, elimRepeated, refchecks, dropForMap}",0.1223
-play-json,"MegaPhase{protectedAccessors, extmethods, uncacheGivenAliases, checkStatic, elimByName, hoistSuperArgs, forwardDepChecks, specializeApplyMethods, tryCatchPatterns, patternMatcher}",0.1141
-play-json,pickler,0.0771
-play-json,"MegaPhase{lambdaLift, elimStaticThis, countOuterAccesses}",0.0682
-play-json,parser,0.0613
-play-json,"MegaPhase{pruneErasedDefs, uninitialized, inlinePatterns, vcInlineMethods, seqLiterals, intercepted, getters, specializeFunctions, specializeTuples, collectNullableFields, elimOuterSelect, resolveSuper, functionXXLForwarders, paramForwarding, genericTuples, letOverApply, arrayConstructors}",0.0456
-play-json,"MegaPhase{dropOuterAccessors, dropParentRefinements, checkNoSuperThis, flatten, transformWildcards, moveStatic, expandPrivate, restoreScopes, selectStatic, repeatableAnnotations}",0.0326
-play-json,staging,0.0292
-play-json,splicing,0.0233
-play-json,pickleQuotes,0.0230
-play-json,"MegaPhase{elimOpaque, explicitOuter, explicitSelf, interpolators, dropBreaks}",0.0219
-play-json,constructors,0.0210
+play-json,inlining,1.4479
+play-json,typer,0.4624
+play-json,genBCode,0.4350
+play-json,erasure,0.3056
+play-json,posttyper,0.2077
+play-json,"MegaPhase{elimErasedValueType, pureStats, vcElideAllocations, etaReduce, arrayApply, elimPolyFunction, tailrec, completeJavaEnums, mixin, lazyVals, memoize, nonLocalReturns, capturedVars}",0.1927
+play-json,"MegaPhase{crossVersionChecks, firstTransform, checkReentrant, elimPackagePrefixes, cookComments, checkLoopingImplicits, betaReduce, inlineVals, expandSAMs, elimRepeated, refchecks, dropForMap}",0.1167
+play-json,"MegaPhase{protectedAccessors, extmethods, uncacheGivenAliases, checkStatic, elimByName, hoistSuperArgs, forwardDepChecks, specializeApplyMethods, tryCatchPatterns, patternMatcher}",0.1069
+play-json,pickler,0.0785
+play-json,"MegaPhase{lambdaLift, elimStaticThis, countOuterAccesses}",0.0695
+play-json,parser,0.0608
+play-json,"MegaPhase{pruneErasedDefs, uninitialized, inlinePatterns, vcInlineMethods, seqLiterals, intercepted, getters, specializeFunctions, specializeTuples, collectNullableFields, elimOuterSelect, resolveSuper, functionXXLForwarders, paramForwarding, genericTuples, letOverApply, arrayConstructors}",0.0464
+play-json,"MegaPhase{dropOuterAccessors, dropParentRefinements, checkNoSuperThis, flatten, transformWildcards, moveStatic, expandPrivate, restoreScopes, selectStatic, repeatableAnnotations}",0.0321
+play-json,staging,0.0304
+play-json,pickleQuotes,0.0268
+play-json,splicing,0.0244
+play-json,"MegaPhase{elimOpaque, explicitOuter, explicitSelf, interpolators, dropBreaks}",0.0223
+play-json,constructors,0.0206
 play-json,inlinedPositions,0.0003
 play-json,unrollDefs,0.0001
 play-json,postInlining,0.0001

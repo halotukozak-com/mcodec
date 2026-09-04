@@ -26,7 +26,7 @@ SCALA2 = "2.13.18"
 LIBS = {
     "mcodec": (
         ["//> using dep com.halotukozak::mcodec::0.0.0-BENCH",
-         "//> using dep com.halotukozak::made::0.5.1"],
+         "//> using dep com.halotukozak::made::0.6.0"],
         ["//> using options -Yexplicit-nulls"],
     ),
     "circe": (
