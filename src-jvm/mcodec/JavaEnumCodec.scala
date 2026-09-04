@@ -1,5 +1,3 @@
-//> using target.platform jvm
-
 package halotukozak.mcodec
 
 import java.lang as jl
