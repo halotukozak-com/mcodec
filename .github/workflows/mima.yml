@@ -4,28 +4,23 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
 
 permissions:
   contents: read
   pull-requests: write
 
-# Report-only: pre-1.0, and the check itself is a prototype. It never fails
-# the build — instead, on a PR, it manages a `needs-major` label (binary
-# incompatibility means an eventual major bump) so the break is visible and
-# trackable without blocking. The label is removed again once a later push
-# to the same PR is compatible.
+# Report-only, mirrors the MiMa setup on halotukozak-com/commons (synced
+# from halotukozak-com/.github to the scala-cli repos) adapted for Mill.
+# Never fails the build — instead, on a PR, it manages a `needs-major` label
+# when there's a real *backward* binary incompatibility, and removes it
+# again once a later push is compatible.
 #
 # On a PR, the baseline is the current `main` tip (the merge commit's first
 # parent), not the last release — otherwise a break introduced by PR n stays
 # baked into `main` and every unrelated PR n+1, n+2, ... would keep getting
 # relabeled until the next release, even though they changed nothing binary.
-# On a plain push (e.g. a merge to main), there's no PR to label, so the
-# report falls back to comparing against the last release for the summary.
-#
-# There's no `needs-minor` (source/TASTy-compat-only breaks) yet: TASTy-MiMa
-# can't read Scala 3.9's TASTy format yet (tasty-mima lags the compiler).
-# Add it here once that's unblocked.
+# On a plain push, there's no PR to label, so the report falls back to
+# comparing against the last release for the summary.
 jobs:
   mima:
     name: MiMa (binary)
@@ -34,6 +29,11 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          java-version: 21
+          distribution: 'temurin'
       - name: Setup coursier cache
         uses: coursier/cache-action@v8.1
       - uses: VirtusLab/scala-cli-setup@v1
@@ -42,19 +42,26 @@ jobs:
         run: |
           set -euo pipefail
 
-          org=$(grep -oP '(?<=using publish.organization ).*' project.scala | tr -d '"')
-          name=$(grep -oP '(?<=using publish.name ).*' project.scala | tr -d '"')
+          org=com.halotukozak
+          name=${{ github.event.repository.name }}
 
-          scala-cli --power package . --exclude benchmark --library -o "$RUNNER_TEMP/new.jar" --force
-          shared_cp=$(scala-cli --power compile . --exclude benchmark --print-class-path | tail -1)
+          new_jar=$(./mill --disable-ticker show jvm.jar | tail -1 | sed -E 's/^"[a-z]*ref:v[0-9]+:[0-9a-f]+://; s/"$//')
+          mill_cp=$(./mill --disable-ticker show jvm.compileClasspath | jq -r '.[]' | sed -E 's/^[a-z]*ref:v[0-9]+:[0-9a-f]+://')
 
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             base_sha=$(git rev-parse HEAD^1)
             baseline_label="main@${base_sha:0:7}"
-            echo "Baseline: $baseline_label (does this PR itself introduce a new binary incompatibility?)"
             git worktree add --detach --quiet "$RUNNER_TEMP/old-src" "$base_sha"
-            scala-cli --power package "$RUNNER_TEMP/old-src" --exclude benchmark --library -o "$RUNNER_TEMP/old.jar" --force
-            old_jar="$RUNNER_TEMP/old.jar"
+            if [ ! -x "$RUNNER_TEMP/old-src/mill" ]; then
+              # Bootstrapping a scala-cli -> Mill migration: the parent commit predates
+              # ./mill, so there's no Mill-built baseline jar to compare against yet.
+              echo "Baseline $baseline_label predates the Mill build (no ./mill) — nothing to compare against." >> "$GITHUB_STEP_SUMMARY"
+              echo "broken=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Baseline: $baseline_label (does this PR itself introduce a new binary incompatibility?)"
+            old_jar=$(cd "$RUNNER_TEMP/old-src" && ./mill --disable-ticker show jvm.jar | tail -1 | sed -E 's/^"[a-z]*ref:v[0-9]+:[0-9a-f]+://; s/"$//')
+            shared_cp="$mill_cp"
           else
             base_tag=$(git tag -l 'v*' --sort=-v:refname | head -1)
             if [ -z "$base_tag" ]; then
@@ -68,12 +75,13 @@ jobs:
             printf '' > "$RUNNER_TEMP/empty.scala"
             old_cp=$(scala-cli --power compile "$RUNNER_TEMP/empty.scala" --dependency "$org::$name:$base_version" --print-class-path | tail -1)
             old_jar=$(printf '%s' "$old_cp" | tr ':' '\n' | grep "/${name}_3/$base_version/")
+            shared_cp="$old_cp:$mill_cp"
           fi
 
           echo "baseline=$baseline_label" >> "$GITHUB_OUTPUT"
 
           set +e
-          scala-cli run .mima/bin-compat-check.scala -- "$old_jar" "$RUNNER_TEMP/new.jar" "$shared_cp" | tee "$RUNNER_TEMP/mima-out.txt"
+          scala-cli run .mima/bin-compat-check.scala -- "$old_jar" "$new_jar" "$shared_cp" | tee "$RUNNER_TEMP/mima-out.txt"
           status=$?
           set -e
 
