@@ -85,7 +85,7 @@ final class ProductCodec[T](
 
   def writeObject(out: ObjectOutput, value: T): Unit =
     val forced = out.hasMarker(Marker.IgnoreTransientDefaults)
-    out.declareSize(writtenFieldCount(value, forced))
+    if out.wantsDeclaredSize then out.declareSize(writtenFieldCount(value, forced))
     writeFieldsOnly(out, value, forced)
 
   def readObject(in: ObjectInput): T = try
@@ -133,7 +133,7 @@ final class NestedSumCodec[T](
   def sizeOf(value: T): Int = 1
   def writeObject(out: ObjectOutput, value: T): Unit =
     val idx = ordinalOf(value)
-    out.declareSize(sizeOf(value))
+    if out.wantsDeclaredSize then out.declareSize(1)
     codecs(idx).write(out.writeField(caseNames(idx)), value)
   def readObject(in: ObjectInput): T = try
     if !in.hasNext then
@@ -206,7 +206,7 @@ final class FlatSumCodec[T](
     val idx = ordinalOf(value)
     val _ = guardChecked
     val forced = out.hasMarker(Marker.IgnoreTransientDefaults)
-    out.declareSize(1 + bodySize(value, forced))
+    if out.wantsDeclaredSize then out.declareSize(1 + bodySize(value, forced))
     out.writeField(caseFieldName).writeSimple().writeString(caseNames(idx))
     codecs(idx) match
       case p: ProductCodec[Any @unchecked] => p.writeFieldsOnly(out, value, forced)

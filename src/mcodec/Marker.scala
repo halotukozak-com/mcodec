@@ -24,6 +24,7 @@ private final class MarkedListOutput(underlying: ListOutput, markers: Set[Marker
   def writeElement(): Output = MarkedOutput(underlying.writeElement(), markers)
   def finish(): Unit = underlying.finish()
   override def declareSize(size: Int): Unit = underlying.declareSize(size)
+  override def wantsDeclaredSize: Boolean = underlying.wantsDeclaredSize
   override def knownSize: Int = underlying.knownSize
   override def hasMarker(marker: Marker): Boolean = markers.contains(marker) || underlying.hasMarker(marker)
 
@@ -31,5 +32,6 @@ private final class MarkedObjectOutput(underlying: ObjectOutput, markers: Set[Ma
   def writeField(key: String): Output = MarkedOutput(underlying.writeField(key), markers)
   def finish(): Unit = underlying.finish()
   override def declareSize(size: Int): Unit = underlying.declareSize(size)
+  override def wantsDeclaredSize: Boolean = underlying.wantsDeclaredSize
   override def knownSize: Int = underlying.knownSize
   override def hasMarker(marker: Marker): Boolean = markers.contains(marker) || underlying.hasMarker(marker)

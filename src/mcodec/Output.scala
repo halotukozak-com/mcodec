@@ -36,6 +36,13 @@ trait SequentialOutput:
   def knownSize: Int = -1
   def hasMarker(marker: Marker): Boolean = false
 
+  /**
+   * Whether [[declareSize]] actually influences the output. Backends that ignore it (JSON) or
+   * back-patch the length (BSON) return `false`, letting a codec skip an otherwise-wasted
+   * pre-count pass; length-prefixed backends (CBOR) return `true`.
+   */
+  def wantsDeclaredSize: Boolean = false
+
 trait ListOutput extends SequentialOutput:
   def writeElement(): Output
 

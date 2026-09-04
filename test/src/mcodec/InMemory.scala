@@ -127,12 +127,14 @@ final class RecordingOutput(sink: MValue => Unit, record: Int => Unit) extends O
 final class RecordingListOutput(sink: MValue => Unit, record: Int => Unit) extends ListOutput:
   private val buffer = Vector.newBuilder[MValue]
   override def declareSize(size: Int): Unit = record(size)
+  override def wantsDeclaredSize: Boolean = true
   def writeElement(): Output = new RecordingOutput(v => buffer += v, record)
   def finish(): Unit = sink(MList(buffer.result()))
 
 final class RecordingObjectOutput(sink: MValue => Unit, record: Int => Unit) extends ObjectOutput:
   private val buffer = Vector.newBuilder[(String, MValue)]
   override def declareSize(size: Int): Unit = record(size)
+  override def wantsDeclaredSize: Boolean = true
   def writeField(key: String): Output = new RecordingOutput(v => buffer += (key -> v), record)
   def finish(): Unit = sink(MObj(buffer.result()))
 

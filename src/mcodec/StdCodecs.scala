@@ -119,7 +119,7 @@ trait StdCodecs:
 
   protected class TupleCodec[T <: Tuple](codecs: List[MCodec[Any]]) extends ListCodec[T]:
     def writeList(out: ListOutput, value: T): Unit =
-      out.declareSize(codecs.size)
+      if out.wantsDeclaredSize then out.declareSize(codecs.size)
       val it = value.productIterator
       codecs.foreach(c => c.write(out.writeElement(), it.next()))
     def readList(in: ListInput): T =
@@ -133,7 +133,7 @@ trait StdCodecs:
 
   private class CollectionCodec[C[X] <: Iterable[X], T: MCodec](using fac: Factory[T, C[T]]) extends ListCodec[C[T]]:
     def writeList(out: ListOutput, value: C[T]): Unit =
-      out.declareSize(value.size)
+      if out.wantsDeclaredSize then out.declareSize(value.size)
       value.foreach(MCodec.write(out.writeElement(), _))
     def readList(in: ListInput): C[T] =
       val b = fac.newBuilder
@@ -152,7 +152,7 @@ trait StdCodecs:
 
   given arrayCodec: [T: {ClassTag, MCodec}] => ListCodec[Array[T]]:
     def writeList(out: ListOutput, value: Array[T]): Unit =
-      out.declareSize(value.length)
+      if out.wantsDeclaredSize then out.declareSize(value.length)
       var i = 0
       while i < value.length do
         MCodec.write(out.writeElement(), value(i))
@@ -167,7 +167,7 @@ trait StdCodecs:
 
   protected class ObjectMapCodec[K: MKeyCodec as keyCodec, V: MCodec] extends ObjectCodec[Map[K, V]]:
     def writeObject(out: ObjectOutput, m: Map[K, V]): Unit =
-      out.declareSize(m.size)
+      if out.wantsDeclaredSize then out.declareSize(m.size)
       m.foreach: (key, value) =>
         MCodec.write(out.writeField(keyCodec.writeKey(key)), value)
     def readObject(in: ObjectInput): Map[K, V] =
@@ -179,7 +179,7 @@ trait StdCodecs:
 
   protected class PairsMapCodec[K: MCodec, V: MCodec] extends ListCodec[Map[K, V]]:
     def writeList(out: ListOutput, m: Map[K, V]): Unit =
-      out.declareSize(m.size)
+      if out.wantsDeclaredSize then out.declareSize(m.size)
       m.foreach: (key, value) =>
         val pair = out.writeElement().writeList()
         MCodec.write(pair.writeElement(), key)
