@@ -31,7 +31,7 @@ trait MCodec[T]:
 object MCodec extends StdCodecs, ManualCodecs, JavaCodecs, Derivation, BsonCodecs:
   inline def apply[T: MCodec as c]: MCodec[T] = c
 
-  transparent inline def derived[T](using m: Made.Of[T]): MCodec[T] = deriveDispatch[T](m)
+  inline def derived[T](using m: Made.Of[T]): MCodec[T] = deriveDispatch[T](m)
 
   def read[T: MCodec as codec](input: Input): T = codec.read(input)
   def write[T: MCodec as codec](output: Output, value: T): Unit = codec.write(output, value)
