@@ -33,14 +33,14 @@ Published to Maven Central under `com.halotukozak`.
 
 ```scala sc:nocompile
 //> using scala 3.9.0
-//> using dep com.halotukozak::mcodec::0.2.0
+//> using dep com.halotukozak::mcodec::0.3.0
 ```
 
 ### sbt
 
 ```scala sc:nocompile
 scalaVersion := "3.9.0"
-libraryDependencies += "com.halotukozak" %% "mcodec" % "0.2.0"
+libraryDependencies += "com.halotukozak" %% "mcodec" % "0.3.0"
 ```
 
 ### mill
