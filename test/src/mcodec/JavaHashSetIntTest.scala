@@ -1,5 +1,3 @@
-//> using target.platform jvm scala-js
-
 package halotukozak.mcodec
 
 import java.util as ju
@@ -7,6 +5,8 @@ import java.util as ju
 // Passes on JVM and Scala.js; crashes the Scala Native runtime with
 // scala.scalanative.runtime.UndefinedBehaviorError, which looks like a
 // scala-native javalib limitation for java.util.HashSet[Int], not a bug here.
+// Excluded from native.test via allSourceFiles in build.mill (no jvm+js-only
+// sibling source dir convention, only per-single-platform ones).
 // See https://github.com/halotukozak-com/mcodec/issues/23
 class JavaHashSetIntTest extends RoundTrip(InMemoryBackend), JsonConv:
 

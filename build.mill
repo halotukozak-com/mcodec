@@ -1,0 +1,205 @@
+//| mill-version: 1.1.8
+//| mill-jvm-version: 21
+//| mvnDeps:
+//| - com.lihaoyi::mill-contrib-scoverage:$MILL_VERSION
+//| - com.lihaoyi::mill-contrib-sonatypecentral:$MILL_VERSION
+//| - com.lihaoyi::mill-contrib-jmh:$MILL_VERSION
+//| - org.scala-steward::scala-steward-mill-plugin::0.19.0
+package build
+
+import mill.*
+import mill.scalalib.*
+import mill.scalalib.publish.*
+import mill.scalajslib.*
+import mill.scalanativelib.*
+import mill.contrib.scoverage.ScoverageModule
+import mill.contrib.jmh.JmhModule
+import mill.util.VcsVersion
+
+object `package` extends Module:
+
+  trait Shared extends ScalaModule with PlatformScalaModule with SonatypeCentralPublishModule:
+    def scalaVersion = "3.9.0"
+
+    override def scalacOptions = Seq(
+      "-deprecation",
+      "-feature",
+      "-new-syntax",
+      "-unchecked",
+      "-language:noAutoTupling",
+      "-Vprofile",
+      "-Xprint-inline",
+      "-Xcheck-macros",
+      "-Ycheck:macros",
+      "-Ydebug-flags",
+      "-Ydebug-missing-refs",
+      "-Yexplain-lowlevel",
+      "-Yexplicit-nulls",
+      "-Yshow-suppressed-errors",
+      "-Yshow-var-bounds",
+      "-Wsafe-init",
+      "-Werror",
+      "-Wunused:all",
+      // -Ycheck:all can't be enabled once Scoverage instruments the trees (same
+      // limitation regex/alpaca hit); -Ycheck:macros above stays.
+      "-Wconf:msg=Skipping coverage instrumentation.*:s",
+      // Dotty misreports the position of Product methods (canEqual, productArity, ...) as
+      // 0 for locally-scoped case classes under -Xcheck-macros -- a compiler-internal
+      // diagnostic bug, not a real code issue.
+      "-Wconf:msg=Missing symbol position.*:s",
+    )
+
+    override def scalaDocOptions = Task {
+      Seq(
+        "-project",
+        "mcodec",
+        "-project-version",
+        publishVersion(),
+        "-project-footer",
+        "made with ❤️ and coffee",
+        "-social-links:github::https://github.com/halotukozak/mcodec",
+        "-snippet-compiler:compile",
+        s"-source-links:$moduleDir=github://halotukozak/mcodec/main",
+        "-revision:main",
+      )
+    }
+
+    def artifactName = "mcodec"
+
+    // Task.env (not sys.env) is required here: Mill's persistent daemon captures its own
+    // process environment once at startup, so a plain `sys.env` read inside a cached Task
+    // never sees a value set after the daemon first launched. Task.Input re-reads it on
+    // every invocation. Used by benchmark.runAll to pin a throwaway 0.0.0-BENCH version for
+    // local publishing, without perturbing normal (git-tag-derived) publish versions.
+    def benchPublishVersion: T[Option[String]] = Task.Input(Task.env.get("MCODEC_BENCH_VERSION"))
+
+    def publishVersion = Task(benchPublishVersion().getOrElse(VcsVersion.vcsState().format()))
+
+    def pomSettings = PomSettings(
+      description = "mcodec - GenCodec-style serialization for Scala 3, built on Made",
+      organization = "com.halotukozak",
+      url = "https://github.com/halotukozak/mcodec",
+      licenses = Seq(License.MIT),
+      versionControl = VersionControl.github("halotukozak", "mcodec"),
+      developers = Seq(Developer("halotukozak", "Bartłomiej Kozak", "https://github.com/halotukozak")),
+    )
+
+    def mvnDeps = Seq(mvn"com.halotukozak::made::0.6.0")
+
+  trait MunitTests extends TestModule.Munit:
+    def munitVersion = "1.3.6"
+    override def mvnDeps = super.mvnDeps() ++ Seq(mvn"org.scalameta::munit-scalacheck::1.3.1")
+
+  object jvm extends Shared with ScoverageModule:
+    def scoverageVersion = "2.5.2"
+
+    object test extends ScalaTests with MunitTests with ScoverageTests
+
+  object js extends Shared with ScalaJSModule:
+    def scalaJSVersion = "1.22.0"
+
+    object test extends ScalaJSTests with MunitTests
+
+  object native extends Shared with ScalaNativeModule:
+    def scalaNativeVersion = "0.5.12"
+
+    object test extends ScalaNativeTests with MunitTests:
+      // Crashes the Scala Native runtime (javalib limitation, not a bug under test) —
+      // no jvm+js-only sibling source dir convention exists, so filter it out here.
+      override def allSourceFiles = Task {
+        super.allSourceFiles().filterNot(_.path.last == "JavaHashSetIntTest.scala")
+      }
+
+  // Comparative benchmarks (compile time + serde throughput) against circe, jsoniter-scala,
+  // uPickle, zio-json, borer, play-json and GenCodec. Not published; no CI (a shared runner
+  // is too noisy for comparative numbers) — run locally with `./mill benchmark.runAll`.
+  // See benchmark/README.md.
+  object benchmark extends ScalaModule with JmhModule:
+    def scalaVersion = build.jvm.scalaVersion()
+    def jmhCoreVersion = "1.37"
+    // Depends on the jvm module's sources directly rather than a published artifact — no
+    // publish-local round-trip needed for the JMH suite itself (only the standalone
+    // compile-time sweep below still needs one, since it exercises scala-cli per library).
+    def moduleDeps = Seq(build.jvm)
+
+    // mcodec compiles under -Werror with a long option list; the benchmark code pulls in
+    // several third-party APIs and doesn't need that strictness.
+    override def scalacOptions = Seq("-deprecation", "-feature", "-new-syntax", "-Wconf:any:silent", "-Yexplicit-nulls")
+
+    override def mvnDeps = super.mvnDeps() ++ Seq(
+      mvn"io.circe::circe-core::0.14.16",
+      mvn"io.circe::circe-parser::0.14.16",
+      mvn"io.circe::circe-generic::0.14.16",
+      mvn"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-core::2.40.1",
+      mvn"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-macros::2.40.1",
+      mvn"com.lihaoyi::upickle::4.4.3",
+      mvn"dev.zio::zio-json::1.0.0",
+      mvn"io.bullet::borer-core::1.18.0",
+      mvn"io.bullet::borer-derivation::1.18.0",
+      mvn"com.typesafe.play::play-json::2.10.8",
+    )
+
+    // GenCodec (AVSystem commons) — the library mcodec is modelled on. It has no Scala 3
+    // release, so this is a separate Scala 2.13 module; only its runtime serialization
+    // numbers feed docs/benchmarks.md (compile time isn't comparable across compilers).
+    object gencodec extends ScalaModule with JmhModule:
+      def scalaVersion = "2.13.18"
+      def jmhCoreVersion = "1.37"
+      override def scalacOptions = Seq("-Xsource:3")
+      override def mvnDeps = super.mvnDeps() ++ Seq(mvn"com.avsystem.commons::commons-core::2.29.0")
+
+    // Full benchmark run: publish mcodec locally, run the JMH serde matrix (both the Scala 3
+    // suite and the separate GenCodec/Scala 2.13 one), run the compile-time sweep, aggregate
+    // to CSV, refresh docs/_docs/benchmarks.md and the charts.
+    //
+    //   ./mill benchmark.runAll            (full: 3 forks, compile sizes 0,1,10,25,50,100, ~1h)
+    //   ./mill benchmark.runAll --mode quick   (1 fork, short iterations, sizes 0,1,10,25)
+    def runAll(mode: String = "full") = Task.Command {
+      val root = moduleDir / os.up
+      val results = root / "benchmark" / "results"
+      os.makeDir.all(results)
+
+      val quick = mode == "quick"
+      val jmhArgs =
+        if quick then Seq("-f", "1", "-wi", "3", "-w", "1", "-i", "5", "-r", "1")
+        else Seq("-f", "3", "-wi", "5", "-w", "1", "-i", "10", "-r", "1")
+      val sizes = if quick then "0,1,10,25" else "0,1,10,25,50,100"
+
+      println("==> publishing mcodec 0.0.0-BENCH to the local Ivy cache")
+      os.call(
+        (root / "mill", "jvm.publishLocal"),
+        cwd = root,
+        env = Map("MCODEC_BENCH_VERSION" -> "0.0.0-BENCH"),
+        stdout = os.Inherit,
+      )
+
+      println("==> serialization / deserialization matrix (JMH, Scala 3)")
+      os.call(
+        Seq((root / "mill").toString, "benchmark.runJmh", "bench.bench.*") ++ jmhArgs ++
+          Seq("-rf", "json", "-rff", (results / "jmh.json").toString, "-foe", "true"),
+        cwd = root,
+        stdout = os.Inherit,
+      )
+
+      println("==> GenCodec serialization (separate Scala 2.13 module)")
+      os.call(
+        Seq((root / "mill").toString, "benchmark.gencodec.runJmh", "bench.gencodec.*") ++ jmhArgs ++
+          Seq("-rf", "json", "-rff", (results / "jmh-gencodec.json").toString, "-foe", "true"),
+        cwd = root,
+        stdout = os.Inherit,
+      )
+
+      println("==> compilation-time sweep")
+      os.call(
+        ("python3", "benchmark/compile/bench_compile.py", "--sizes", sizes, "--out", results.toString),
+        cwd = root,
+        stdout = os.Inherit,
+      )
+
+      println("==> aggregating + refreshing report")
+      os.call(("python3", "benchmark/scripts/aggregate.py", "--results", results.toString), cwd = root, stdout = os.Inherit)
+      try os.call(("benchmark/scripts/plot.py", "--results", results.toString), cwd = root, stdout = os.Inherit)
+      catch case e: Exception => println(s"(plot skipped — need 'uv' or matplotlib: ${e.getMessage})")
+
+      println("==> done. See docs/_docs/benchmarks.md and benchmark/results/*.csv")
+    }

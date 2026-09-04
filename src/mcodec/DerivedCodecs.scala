@@ -2,6 +2,36 @@ package halotukozak.mcodec
 
 import halotukozak.made.NotExists
 
+private val Absent: AnyRef = new AnyRef
+
+/**
+ * Open-addressed `String -> Int` field lookup: no boxing, no `Option`, immutable once built.
+ * Replaces `labels.zipWithIndex.toMap` on the read hot path.
+ */
+private final class FieldLookup(names: Array[String]):
+  private val mask =
+    var c = 8
+    while c < names.length * 2 do c <<= 1
+    c - 1
+  private val slots = new Array[Int](mask + 1) // 0 = empty; else (field index + 1)
+  locally:
+    var i = 0
+    while i < names.length do
+      var s = names(i).hashCode & mask
+      while slots(s) != 0 do s = (s + 1) & mask
+      slots(s) = i + 1
+      i += 1
+
+  /** Field index for `name`, or -1 if it is not a known field. */
+  def indexOf(name: String): Int =
+    var s = name.hashCode & mask
+    var e = slots(s)
+    while e != 0 do
+      if names(e - 1) == name then return e - 1
+      s = (s + 1) & mask
+      e = slots(s)
+    -1
+
 final class ProductCodec[T](
   typeName: String,
   labels: Array[String],
@@ -20,7 +50,7 @@ final class ProductCodec[T](
   private[mcodec] def bodyFieldNames: Array[String] = labels
   private lazy val childCodecs = childCodecsByName
   private lazy val genCodecs = genCodecsByName
-  private val byName = labels.zipWithIndex.toMap
+  private val fields = new FieldLookup(labels)
 
   // Single source of truth for both counting and writing. Structural `==` is the
   // transient-default contract; Array-typed defaults compare by reference (rarely omitted).
@@ -59,25 +89,25 @@ final class ProductCodec[T](
     writeFieldsOnly(out, value, forced)
 
   def readObject(in: ObjectInput): T = try
-    val values = new Array[Any](labels.length)
-    val seen = new Array[Boolean](labels.length)
+    val n = labels.length
+    // `Absent` sentinel marks a still-unfilled slot, so an explicitly-read `null`
+    // (a `T | Null` field) is distinguishable from a missing field without a second array.
+    val values = Array.fill[Any](n)(Absent)
     val deferred = scala.collection.mutable.ArrayBuffer.empty[(Int, CapturedValue)]
     while in.hasNext do
       val f = in.nextField()
-      byName.get(f.fieldName) match
-        case Some(idx) =>
-          if outOfOrderFlags(idx) then deferred += (idx -> CapturedValue.capture(f))
-          else
-            values(idx) = withSegment(PathSegment.Field(f.fieldName)):
-              childCodecs(idx).read(f)
-          seen(idx) = true
-        case None => f.skip()
+      val idx = fields.indexOf(f.fieldName)
+      if idx < 0 then f.skip()
+      else if outOfOrderFlags(idx) then deferred += (idx -> CapturedValue.capture(f))
+      else
+        values(idx) = withSegment(PathSegment.Field(f.fieldName)):
+          childCodecs(idx).read(f)
     deferred.foreach: (idx, cv) =>
       values(idx) = withSegment(PathSegment.Field(labels(idx))):
         childCodecs(idx).read(new CapturedInput(cv))
     var i = 0
-    while i < labels.length do
-      if !seen(i) then
+    while i < n do
+      if values(i).asInstanceOf[AnyRef] eq Absent then
         values(i) = defaults(i) match
           case NotExists =>
             if optionalFlags(i) || isOption(i) then None
