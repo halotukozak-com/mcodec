@@ -275,9 +275,11 @@ final class JsonListInput(reader: JsonReader) extends ListInput:
   def nextElement(): Input = elem
 
 final class JsonFieldInput(reader: JsonReader) extends JsonInput(reader), FieldInput:
-  // Mutable so JsonObjectInput can reuse one instance per object; a FieldInput is only
-  // valid until the next nextField()/hasNext() on its ObjectInput.
-  var fieldName: String = ""
+  // Mutable (package-private setter) so JsonObjectInput can reuse one instance per object;
+  // a FieldInput is only valid until the next nextField()/hasNext() on its ObjectInput.
+  private var _fieldName: String = ""
+  def fieldName: String = _fieldName
+  private[mcodec] def fieldName_=(name: String): Unit = _fieldName = name
 
 final class JsonObjectInput(reader: JsonReader) extends ObjectInput:
   private var started = false
