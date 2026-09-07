@@ -112,16 +112,16 @@ trait Derivation:
       inline if compiletime.constValue[head & Boolean] then compiletime.error("more than one @defaultCase in hierarchy")
       else rejectMoreDefaults(fs.tail)
 
-  inline def summonOrDeriveCases[Elems <: Tuple]: List[MCodec[Any]] =
-    inline compiletime.erasedValue[Elems] match
-      case _: EmptyTuple => Nil
-      case _: (head *: tail) =>
-        val c = compiletime.summonFrom:
-          case given MCodec[`head`] => compiletime.summonInline[MCodec[head]]
-          case _ => MCodec.derived[head]
-        : @nowarn("msg=unused pattern variable")
+  inline def summonOrDeriveCases[Elems <: Tuple]: List[MCodec[Any]] = inline compiletime.erasedValue[Elems] match {
+    case _: EmptyTuple => Nil
+    case _: (head *: tail) =>
+      val c = compiletime.summonFrom:
+        case given MCodec[`head`] => compiletime.summonInline[MCodec[head]]
+        case _ => MCodec.derived[head]
+      : @nowarn("msg=unused pattern variable")
 
-        c.asInstanceOf[MCodec[Any]] :: summonOrDeriveCases[tail]
+      c.asInstanceOf[MCodec[Any]] :: summonOrDeriveCases[tail]
+  }
 
   inline def deriveSingleton[T](m: Made.SingletonOf[T]): MCodec[T] = SingletonCodec[T](m.value)
 
