@@ -47,7 +47,7 @@ libraryDependencies += "com.halotukozak" %% "mcodec" % "0.3.0"
 
 ```scala sc:nocompile
 def scalaVersion = "3.9.0"
-def mvnDeps = Seq(mvn"com.halotukozak::mcodec::0.2.0")
+def mvnDeps = Seq(mvn"com.halotukozak::mcodec::0.3.0")
 ```
 
 ## Quickstart
