@@ -134,7 +134,7 @@ object `package` extends Module:
       mvn"io.circe::circe-parser::0.14.16",
       mvn"io.circe::circe-generic::0.14.16",
       mvn"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-core::2.40.1",
-      mvn"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-macros::2.40.1",
+      mvn"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-macros::2.41.0",
       mvn"com.lihaoyi::upickle::4.4.3",
       mvn"dev.zio::zio-json::1.0.0",
       mvn"io.bullet::borer-core::1.18.0",
