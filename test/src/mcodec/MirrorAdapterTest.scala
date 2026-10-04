@@ -10,5 +10,5 @@ class MirrorAdapterTest extends munit.FunSuite:
     val m = Made.derived[User]
     val (nameElem, ageElem) = m.elems
     assertEquals(compiletime.constValue[nameElem.Label], "user_name")
-    assertEquals(nameElem.default, NotExists)
-    assertEquals(ageElem.default, 18)
+    assertEquals[Any, Any](nameElem.default, NotExists)
+    assertEquals[Any, Any](ageElem.default, 18)

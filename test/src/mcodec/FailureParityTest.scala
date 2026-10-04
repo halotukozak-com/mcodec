@@ -21,21 +21,21 @@ class FailureParityTest extends munit.FunSuite, JsonConv, CborConv:
   // 1. Missing field — typed subclass MissingField (JSON proven, CBOR discovered).
   test("missing field — JSON — MissingField + envelope"):
     val rf = intercept[ReadFailure](fromJson[Point]("{}"))
-    assert(rf.isInstanceOf[MissingField], s"got ${rf.getClass}")
+    assert(rf.isInstanceOf[MissingField], s"got ${rf.getClass.getName}")
     assert(rf.getMessage.contains("Failed to read Point"))
     assert(rf.getMessage.contains("missing"))
 
   test("missing field — CBOR — MissingField + envelope"):
     // A0 = empty CBOR map = product with no fields
     val rf = intercept[ReadFailure](fromCborHex[Point]("A0"))
-    assert(rf.isInstanceOf[MissingField], s"CBOR missing-field divergence — got ${rf.getClass}")
+    assert(rf.isInstanceOf[MissingField], s"CBOR missing-field divergence — got ${rf.getClass.getName}")
     assert(rf.getMessage.contains("Failed to read Point"))
     assert(rf.getMessage.contains("missing"))
 
   // 2. Unknown case — typed subclass UnknownCase (JSON proven, CBOR discovered).
   test("unknown case — JSON — UnknownCase + discriminator"):
     val rf = intercept[ReadFailure](fromJson[Shape]("""{"Triangle":{}}"""))
-    assert(rf.isInstanceOf[UnknownCase], s"got ${rf.getClass}")
+    assert(rf.isInstanceOf[UnknownCase], s"got ${rf.getClass.getName}")
     assert(rf.getMessage.contains("Failed to read Shape"))
     assert(rf.getMessage.contains("unknown case"))
     assert(rf.getMessage.contains("Triangle"))
@@ -43,7 +43,7 @@ class FailureParityTest extends munit.FunSuite, JsonConv, CborConv:
   test("unknown case — CBOR — UnknownCase + discriminator"):
     // A1 68 "Triangle" A0  = map1 { text "Triangle" -> empty map } (observed)
     val rf = intercept[ReadFailure](fromCborHex[Shape]("A168547269616E676C65A0"))
-    assert(rf.isInstanceOf[UnknownCase], s"CBOR unknown-case divergence — got ${rf.getClass}")
+    assert(rf.isInstanceOf[UnknownCase], s"CBOR unknown-case divergence — got ${rf.getClass.getName}")
     assert(rf.getMessage.contains("unknown case"))
     assert(rf.getMessage.contains("Triangle"))
 

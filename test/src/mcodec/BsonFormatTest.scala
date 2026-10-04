@@ -7,15 +7,17 @@ case class Point(x: Int, y: Int) derives MCodec
 
 class BsonFormatTest extends munit.FunSuite, BsonConv, JsonConv:
   given MCodec[Int | Null] = MCodec[Int].nullable
+  // spelled out so the derived instance isn't inferred at the union
+  given MCodec[BsonWrap[Int | Null]] = MCodec.derived[BsonWrap[Int | Null]]
 
   // ---- BS1: a document is the only legal top-level shape ----
   test("BS1 scalar/list at the true top level is rejected on write"):
-    intercept[WriteFailure](0.toBsonHex[Int])
-    intercept[WriteFailure](List(1, 2, 3).toBsonHex[List[Int]])
+    intercept[WriteFailure](0.toBsonHex[Int]): Unit
+    intercept[WriteFailure](List(1, 2, 3).toBsonHex[List[Int]]): Unit
     intercept[WriteFailure]("hi".toBsonHex[String])
 
   test("BS1 scalar/list at the true top level is rejected on read"):
-    intercept[ReadFailure](fromBsonHex[Int]("01000000"))
+    intercept[ReadFailure](fromBsonHex[Int]("01000000")): Unit
     intercept[ReadFailure](fromBsonHex[List[Int]]("01000000"))
 
   test("BS1 an object-shaped value writes and reads as a top-level document"):

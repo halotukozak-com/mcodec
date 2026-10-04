@@ -32,7 +32,7 @@ class ExtendedStdCodecsTest extends RoundTrip(InMemoryBackend), JsonConv:
     assertEquals(5.toByte.toJson[Byte], "5")
 
   test("Byte/Short overflow rejected via the codec path"):
-    intercept[ReadFailure](MCodec[Byte].read(new InMemoryInput(MInt(300))))
+    intercept[ReadFailure](MCodec[Byte].read(new InMemoryInput(MInt(300)))): Unit
     intercept[ReadFailure](MCodec[Short].read(new InMemoryInput(MInt(40000))))
 
   // ===== java.util.Date (epoch-millis encoding — NO ISO parsing) =====
@@ -86,44 +86,44 @@ class ExtendedStdCodecsTest extends RoundTrip(InMemoryBackend), JsonConv:
 
   // ===== Java boxed types (all 10) =====
   test("boxed types round-trip via emit/read (value equality)"):
-    assertEquals(
+    assertEquals[Any, Any](
       MCodec[jl.Boolean | Null].read(InMemoryBackend.input(emit[jl.Boolean | Null](jl.Boolean.valueOf(true)))),
       jl.Boolean.valueOf(true),
     )
-    assertEquals(
+    assertEquals[Any, Any](
       MCodec[jl.Character | Null].read(InMemoryBackend.input(emit[jl.Character | Null](jl.Character.valueOf('a')))),
       jl.Character.valueOf('a'),
     )
-    assertEquals(
+    assertEquals[Any, Any](
       MCodec[jl.Byte | Null].read(InMemoryBackend.input(emit[jl.Byte | Null](jl.Byte.valueOf(3.toByte)))),
       jl.Byte.valueOf(3.toByte),
     )
-    assertEquals(
+    assertEquals[Any, Any](
       MCodec[jl.Short | Null].read(InMemoryBackend.input(emit[jl.Short | Null](jl.Short.valueOf(4.toShort)))),
       jl.Short.valueOf(4.toShort),
     )
-    assertEquals(
+    assertEquals[Any, Any](
       MCodec[jl.Integer | Null].read(InMemoryBackend.input(emit[jl.Integer | Null](jl.Integer.valueOf(7)))),
       jl.Integer.valueOf(7),
     )
-    assertEquals(
+    assertEquals[Any, Any](
       MCodec[jl.Long | Null].read(InMemoryBackend.input(emit[jl.Long | Null](jl.Long.valueOf(8L)))),
       jl.Long.valueOf(8L),
     )
-    assertEquals(
+    assertEquals[Any, Any](
       MCodec[jl.Float | Null].read(InMemoryBackend.input(emit[jl.Float | Null](jl.Float.valueOf(1.5f)))),
       jl.Float.valueOf(1.5f),
     )
-    assertEquals(
+    assertEquals[Any, Any](
       MCodec[jl.Double | Null].read(InMemoryBackend.input(emit[jl.Double | Null](jl.Double.valueOf(2.5)))),
       jl.Double.valueOf(2.5),
     )
-    assertEquals(
+    assertEquals[Any, Any](
       MCodec[java.math.BigInteger | Null]
         .read(InMemoryBackend.input(emit[java.math.BigInteger | Null](java.math.BigInteger.valueOf(9L)))),
       java.math.BigInteger.valueOf(9L),
     )
-    assertEquals(
+    assertEquals[Any, Any](
       MCodec[java.math.BigDecimal | Null]
         .read(InMemoryBackend.input(emit[java.math.BigDecimal | Null](java.math.BigDecimal.valueOf(1.25)))),
       java.math.BigDecimal.valueOf(1.25),
@@ -133,7 +133,7 @@ class ExtendedStdCodecsTest extends RoundTrip(InMemoryBackend), JsonConv:
     assertEquals(emit[jl.Integer | Null](jl.Integer.valueOf(7)), MInt(7))
 
   test("boxed types are nullable (wire-null <-> JVM null)"):
-    assertEquals(MCodec[jl.Integer | Null].read(InMemoryBackend.input(MNull)), null)
+    assertEquals[Any, Any](MCodec[jl.Integer | Null].read(InMemoryBackend.input(MNull)), null)
     assertEquals(emit[jl.Integer | Null](null), MNull)
 
   // ===== Java collections / maps via JFactory =====

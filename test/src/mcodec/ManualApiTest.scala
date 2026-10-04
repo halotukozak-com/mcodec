@@ -35,9 +35,9 @@ class ManualApiTest extends munit.FunSuite, JsonConv:
   test("createList round-trips as a positional list"):
     given MCodec[Pair] = MCodec.createList[Pair](
       in =>
-        in.hasNext
+        assert(in.hasNext)
         val a = in.nextElement().readSimple().readInt()
-        in.hasNext
+        assert(in.hasNext)
         val b = in.nextElement().readSimple().readInt()
         Pair(a, b)
       ,
@@ -51,7 +51,7 @@ class ManualApiTest extends munit.FunSuite, JsonConv:
   test("createObject round-trips as an object"):
     given MCodec[Wrap] = MCodec.createObject[Wrap](
       in =>
-        in.hasNext
+        assert(in.hasNext)
         Wrap(in.nextField().readSimple().readInt())
       ,
       (out, w) => out.writeField("n").writeSimple().writeInt(w.n),
