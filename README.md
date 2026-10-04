@@ -32,21 +32,21 @@ Published to Maven Central under `com.halotukozak`.
 ### scala-cli
 
 ```scala sc:nocompile
-//> using scala 3.9.0
+//> using scala 3.10.0
 //> using dep com.halotukozak::mcodec::0.3.0
 ```
 
 ### sbt
 
 ```scala sc:nocompile
-scalaVersion := "3.9.0"
+scalaVersion := "3.10.0"
 libraryDependencies += "com.halotukozak" %% "mcodec" % "0.3.0"
 ```
 
 ### mill
 
 ```scala sc:nocompile
-def scalaVersion = "3.9.0"
+def scalaVersion = "3.10.0"
 def mvnDeps = Seq(mvn"com.halotukozak::mcodec::0.3.0")
 ```
 
