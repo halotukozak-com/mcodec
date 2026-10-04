@@ -70,7 +70,7 @@ class CapturedInput(value: CapturedValue) extends InputAndSimpleInput:
   import CapturedValue.*
 
   private def mismatch(expected: String): Nothing =
-    throw ReadFailure(s"expected $expected but got $value")
+    throw ReadFailure(s"expected $expected but got ${value.toString}")
 
   def readNull(): Boolean = value == CNull
   def readString(): String = value match

@@ -116,22 +116,23 @@ final class JsonReader(s: String):
           if i >= s.length then throw ReadFailure("unterminated string" + posSuffix(i))
           val e = s.charAt(i)
           i += 1
-          (e: @switch) match
-            case '"' => b.append('"')
-            case '\\' => b.append('\\')
-            case '/' => b.append('/')
-            case 'b' => b.append('\b')
-            case 'f' => b.append('\f')
-            case 'n' => b.append('\n')
-            case 'r' => b.append('\r')
-            case 't' => b.append('\t')
+          val unescaped = (e: @switch) match
+            case '"' => '"'
+            case '\\' => '\\'
+            case '/' => '/'
+            case 'b' => '\b'
+            case 'f' => '\f'
+            case 'n' => '\n'
+            case 'r' => '\r'
+            case 't' => '\t'
             case 'u' =>
               if i + 4 > s.length then throw ReadFailure("truncated \\u escape" + posSuffix(i))
               val hex = s.substring(i, i + 4)
               i += 4
-              b.append(Integer.parseInt(hex, 16).toChar)
+              Integer.parseInt(hex, 16).toChar
             case other => throw ReadFailure(s"invalid escape: \\$other" + posSuffix(i))
-        case other => b.append(other)
+          b.append(unescaped): Unit
+        case other => b.append(other): Unit
     b.toString
 
   def readNull(): Boolean =
@@ -160,13 +161,13 @@ final class JsonReader(s: String):
     (s.charAt(i): @switch) match
       case '{' => skipContainer('{', '}')
       case '[' => skipContainer('[', ']')
-      case '"' => readRawString()
+      case '"' => readRawString(): Unit
       case _ =>
         val c = s.charAt(i)
-        if c == 't' || c == 'f' then readBoolean()
+        if c == 't' || c == 'f' then readBoolean(): Unit
         else if c == 'n' then
           if !readNull() then throw ReadFailure("invalid token" + posSuffix(i))
-        else readRawNumber()
+        else readRawNumber(): Unit
 
   private def skipContainer(open: Char, close: Char): Unit =
     expect(open)
@@ -182,7 +183,7 @@ final class JsonReader(s: String):
         case `close` =>
           depth -= 1
           i += 1
-        case '"' => readRawString()
+        case '"' => readRawString(): Unit
         case _ => i += 1
 
   private[mcodec] def finishTopLevel(): Unit =
