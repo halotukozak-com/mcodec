@@ -19,7 +19,7 @@ import mill.util.VcsVersion
 object `package` extends Module:
 
   trait Shared extends ScalaModule with PlatformScalaModule with SonatypeCentralPublishModule:
-    def scalaVersion = "3.9.0"
+    def scalaVersion = "3.10.0"
 
     override def scalacOptions = Seq(
       "-deprecation",
@@ -146,7 +146,7 @@ object `package` extends Module:
     // release, so this is a separate Scala 2.13 module; only its runtime serialization
     // numbers feed docs/benchmarks.md (compile time isn't comparable across compilers).
     object gencodec extends ScalaModule with JmhModule:
-      def scalaVersion = "2.13.18"
+      def scalaVersion = "3.10.0"
       def jmhCoreVersion = "1.37"
       override def scalacOptions = Seq("-Xsource:3")
       override def mvnDeps = super.mvnDeps() ++ Seq(mvn"com.avsystem.commons::commons-core::2.29.0")
