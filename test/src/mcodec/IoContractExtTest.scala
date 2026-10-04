@@ -36,7 +36,7 @@ class IoContractExtTest extends munit.FunSuite:
       assertEquals(jsonRead(s)(_.readByte()), b)
 
   test("readByte rejects Int out of Byte range (no silent wrap)"):
-    intercept[ReadFailure](imRead(MInt(300))(_.readByte()))
+    intercept[ReadFailure](imRead(MInt(300))(_.readByte())): Unit
     intercept[ReadFailure](imRead(MInt(-200))(_.readByte()))
 
   // ===== Short =====
@@ -51,7 +51,7 @@ class IoContractExtTest extends munit.FunSuite:
       assertEquals(jsonRead(s)(_.readShort()), sh)
 
   test("readShort rejects Int out of Short range"):
-    intercept[ReadFailure](imRead(MInt(40000))(_.readShort()))
+    intercept[ReadFailure](imRead(MInt(40000))(_.readShort())): Unit
     intercept[ReadFailure](imRead(MInt(-40000))(_.readShort()))
 
   // ===== Char =====
@@ -64,7 +64,7 @@ class IoContractExtTest extends munit.FunSuite:
     assertEquals(jsonRead("\"z\"")(_.readChar()), 'z')
 
   test("readChar rejects a string whose length != 1"):
-    intercept[ReadFailure](imRead(MString("ab"))(_.readChar()))
+    intercept[ReadFailure](imRead(MString("ab"))(_.readChar())): Unit
     intercept[ReadFailure](imRead(MString(""))(_.readChar()))
 
   // ===== Float precision =====
@@ -123,7 +123,7 @@ class IoContractExtTest extends munit.FunSuite:
   test("Binary InMemory wire-shape is an MString (base64 default routes through writeString)"):
     imHarvest(_.writeBinary(Array[Byte](1, 2, 3))) match
       case MString(_) => ()
-      case other => fail(s"expected MString base64, got $other")
+      case other => fail(s"expected MString base64, got ${other.toString}")
 
   test("Binary JSON wire-shape is a quoted base64 string"):
     val s = jsonHarvest(_.writeBinary(Array[Byte](0, 1, 2)))

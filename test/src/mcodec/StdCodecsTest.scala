@@ -65,7 +65,7 @@ class StdCodecsTest extends RoundTrip(InMemoryBackend), JsonConv:
     captured match
       case MList(items) =>
         assertEquals(items, Vector(MList(Vector(MList(Vector(MInt(1))), MInt(2)))))
-      case other => fail(s"expected MList of pairs, got $other")
+      case other => fail(s"expected MList of pairs, got ${other.toString}")
 
   test("Set dedups duplicate elements"):
     val read = MCodec[Set[Int]].read(InMemoryBackend.input(MList(Vector(MInt(1), MInt(1), MInt(2)))))

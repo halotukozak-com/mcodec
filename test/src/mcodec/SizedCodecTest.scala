@@ -20,13 +20,13 @@ class SizedCodecTest extends munit.FunSuite, JsonConv:
 
   private def declaredOf[T: MCodec](v: T): Int =
     val (_, sizes) = RecordingBackend.declaredSizes(v)
-    assertEquals(sizes.length, 1, s"expected exactly one declareSize, got $sizes")
+    assertEquals(sizes.length, 1, s"expected exactly one declareSize, got ${sizes.toString}")
     sizes.head
 
   private def writtenFieldCount(mv: MValue): Int = mv match
     case MValue.MObj(fs) => fs.length
     case MValue.MList(xs) => xs.length
-    case other => fail(s"expected object/list, got $other")
+    case other => fail(s"expected object/list, got ${other.toString}")
 
   test("product declares exact field count for all-present case"):
     assertEquals(declaredOf(AllPresent(1, "y", true)), 3)
@@ -49,7 +49,7 @@ class SizedCodecTest extends munit.FunSuite, JsonConv:
   test("declared count equals fields actually written"):
     def check[T: MCodec](v: T): Unit =
       val (mv, sizes) = RecordingBackend.declaredSizes(v)
-      assertEquals(sizes.length, 1, s"expected exactly one declareSize, got $sizes")
+      assertEquals(sizes.length, 1, s"expected exactly one declareSize, got ${sizes.toString}")
       assertEquals(sizes.head, writtenFieldCount(mv))
     check(AllPresent(1, "y", true))
     check(WithBareOption(1, None))

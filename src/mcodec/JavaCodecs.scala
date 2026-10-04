@@ -51,31 +51,31 @@ trait JavaCodecs:
   given arrayListFactory: [A] => JFactory[A, ju.ArrayList[A]] = new:
     def newBuilder = new JBuilder[A, ju.ArrayList[A]]:
       private val c = new ju.ArrayList[A]()
-      def add(a: A): Unit = c.add(a)
+      def add(a: A): Unit = c.add(a): Unit
       def result(): ju.ArrayList[A] = c
 
   given linkedListFactory: [A] => JFactory[A, ju.LinkedList[A]] = new:
     def newBuilder = new JBuilder[A, ju.LinkedList[A]]:
       private val c = new ju.LinkedList[A]()
-      def add(a: A): Unit = c.add(a)
+      def add(a: A): Unit = c.add(a): Unit
       def result(): ju.LinkedList[A] = c
 
   given hashSetFactory: [A] => JFactory[A, ju.HashSet[A]] = new:
     def newBuilder = new JBuilder[A, ju.HashSet[A]]:
       private val c = new ju.HashSet[A]()
-      def add(a: A): Unit = c.add(a)
+      def add(a: A): Unit = c.add(a): Unit
       def result(): ju.HashSet[A] = c
 
   given linkedHashSetFactory: [A] => JFactory[A, ju.LinkedHashSet[A]] = new:
     def newBuilder = new JBuilder[A, ju.LinkedHashSet[A]]:
       private val c = new ju.LinkedHashSet[A]()
-      def add(a: A): Unit = c.add(a)
+      def add(a: A): Unit = c.add(a): Unit
       def result(): ju.LinkedHashSet[A] = c
 
   given treeSetFactory: [A] => JFactory[A, ju.TreeSet[A]] = new:
     def newBuilder = new JBuilder[A, ju.TreeSet[A]]:
       private val c = new ju.TreeSet[A]()
-      def add(a: A): Unit = c.add(a)
+      def add(a: A): Unit = c.add(a): Unit
       def result(): ju.TreeSet[A] = c
 
   given jCollectionCodec: [A: MCodec, C <: ju.Collection[A]] => (fac: JFactory[A, C]) => ListCodec[C]:
@@ -99,19 +99,19 @@ trait JavaCodecs:
   given hashMapFactory: [K, V] => JMapFactory[K, V, ju.HashMap[K, V]] = new:
     def newBuilder = new JMapBuilder[K, V, ju.HashMap[K, V]]:
       private val m = new ju.HashMap[K, V]()
-      def put(k: K, v: V): Unit = m.put(k, v)
+      def put(k: K, v: V): Unit = m.put(k, v): Unit
       def result(): ju.HashMap[K, V] = m
 
   given linkedHashMapFactory: [K, V] => JMapFactory[K, V, ju.LinkedHashMap[K, V]] = new:
     def newBuilder = new JMapBuilder[K, V, ju.LinkedHashMap[K, V]]:
       private val m = new ju.LinkedHashMap[K, V]()
-      def put(k: K, v: V): Unit = m.put(k, v)
+      def put(k: K, v: V): Unit = m.put(k, v): Unit
       def result(): ju.LinkedHashMap[K, V] = m
 
   given treeMapFactory: [K, V] => JMapFactory[K, V, ju.TreeMap[K, V]] = new:
     def newBuilder = new JMapBuilder[K, V, ju.TreeMap[K, V]]:
       private val m = new ju.TreeMap[K, V]()
-      def put(k: K, v: V): Unit = m.put(k, v)
+      def put(k: K, v: V): Unit = m.put(k, v): Unit
       def result(): ju.TreeMap[K, V] = m
 
   given jMapCodec: [K: MKeyCodec as kc, V: MCodec, M <: ju.Map[K, V]] => (fac: JMapFactory[K, V, M]) => ObjectCodec[M]:

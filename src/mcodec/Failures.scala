@@ -12,15 +12,15 @@ object PathSegment:
     var first = true
     path.foreach:
       case Field(n) =>
-        if !first then sb.append('.')
+        if !first then sb.append('.'): Unit
         sb.append(n)
         first = false
       case Case(n) =>
-        if !first then sb.append('.')
+        if !first then sb.append('.'): Unit
         sb.append(n)
         first = false
-      case Index(i) => sb.append('[').append(i).append(']')
-      case Key(k) => sb.append('[').append(k).append(']')
+      case Index(i) => sb.append('[').append(i).append(']'): Unit
+      case Key(k) => sb.append('[').append(k).append(']'): Unit
     sb.toString
 
 class ReadFailure protected (
@@ -78,11 +78,11 @@ object ReadFailure:
     case _: PathSegment.Case => new CaseReadFailed(reason, path, rootType, cause)
 
 final class MissingField protected (
-  reason: String,
-  path: List[PathSegment],
-  rootType: String | Null,
+  msg: String,
+  at: List[PathSegment],
+  root: String | Null,
   cause: Throwable | Null,
-) extends ReadFailure(reason, path, rootType, cause):
+) extends ReadFailure(msg, at, root, cause):
   def this(msg: String) = this(msg, Nil, null, null)
   override protected def rebuild(
     reason: String,
@@ -93,11 +93,11 @@ final class MissingField protected (
     new MissingField(reason, path, rootType, cause)
 
 final class UnknownCase protected (
-  reason: String,
-  path: List[PathSegment],
-  rootType: String | Null,
+  msg: String,
+  at: List[PathSegment],
+  root: String | Null,
   cause: Throwable | Null,
-) extends ReadFailure(reason, path, rootType, cause):
+) extends ReadFailure(msg, at, root, cause):
   def this(msg: String) = this(msg, Nil, null, null)
   override protected def rebuild(
     reason: String,
@@ -108,11 +108,11 @@ final class UnknownCase protected (
     new UnknownCase(reason, path, rootType, cause)
 
 final class CaseReadFailed private[mcodec] (
-  reason: String,
-  path: List[PathSegment],
-  rootType: String | Null,
+  msg: String,
+  at: List[PathSegment],
+  root: String | Null,
   cause: Throwable | Null,
-) extends ReadFailure(reason, path, rootType, cause):
+) extends ReadFailure(msg, at, root, cause):
   def this(msg: String) = this(msg, Nil, null, null)
   def this(msg: String, cause: Throwable | Null) = this(msg, Nil, null, cause)
   override protected def rebuild(
@@ -125,11 +125,11 @@ final class CaseReadFailed private[mcodec] (
 
 // No discriminator / empty wrapper where a case was required.
 final class MissingCase protected (
-  reason: String,
-  path: List[PathSegment],
-  rootType: String | Null,
+  msg: String,
+  at: List[PathSegment],
+  root: String | Null,
   cause: Throwable | Null,
-) extends ReadFailure(reason, path, rootType, cause):
+) extends ReadFailure(msg, at, root, cause):
   def this(msg: String) = this(msg, Nil, null, null)
   override protected def rebuild(
     reason: String,
@@ -141,11 +141,11 @@ final class MissingCase protected (
 
 // Discriminated-sum wrapper object had more than the single expected field.
 final class NotSingleField protected (
-  reason: String,
-  path: List[PathSegment],
-  rootType: String | Null,
+  msg: String,
+  at: List[PathSegment],
+  root: String | Null,
   cause: Throwable | Null,
-) extends ReadFailure(reason, path, rootType, cause):
+) extends ReadFailure(msg, at, root, cause):
   def this(msg: String) = this(msg, Nil, null, null)
   override protected def rebuild(
     reason: String,
@@ -158,11 +158,11 @@ final class NotSingleField protected (
 // Location-typed failures produced when a plain failure is wrapped by a path segment
 // (Field/Index/Key). Case-segment wrapping produces `CaseReadFailed` above.
 final class FieldReadFailed private[mcodec] (
-  reason: String,
-  path: List[PathSegment],
-  rootType: String | Null,
+  msg: String,
+  at: List[PathSegment],
+  root: String | Null,
   cause: Throwable | Null,
-) extends ReadFailure(reason, path, rootType, cause):
+) extends ReadFailure(msg, at, root, cause):
   def this(msg: String) = this(msg, Nil, null, null)
   override protected def rebuild(
     reason: String,
@@ -173,11 +173,11 @@ final class FieldReadFailed private[mcodec] (
     new FieldReadFailed(reason, path, rootType, cause)
 
 final class ListElementReadFailed private[mcodec] (
-  reason: String,
-  path: List[PathSegment],
-  rootType: String | Null,
+  msg: String,
+  at: List[PathSegment],
+  root: String | Null,
   cause: Throwable | Null,
-) extends ReadFailure(reason, path, rootType, cause):
+) extends ReadFailure(msg, at, root, cause):
   def this(msg: String) = this(msg, Nil, null, null)
   override protected def rebuild(
     reason: String,
@@ -188,11 +188,11 @@ final class ListElementReadFailed private[mcodec] (
     new ListElementReadFailed(reason, path, rootType, cause)
 
 final class MapFieldReadFailed private[mcodec] (
-  reason: String,
-  path: List[PathSegment],
-  rootType: String | Null,
+  msg: String,
+  at: List[PathSegment],
+  root: String | Null,
   cause: Throwable | Null,
-) extends ReadFailure(reason, path, rootType, cause):
+) extends ReadFailure(msg, at, root, cause):
   def this(msg: String) = this(msg, Nil, null, null)
   override protected def rebuild(
     reason: String,

@@ -35,23 +35,23 @@ private def writeJsonString(sb: java.lang.StringBuilder, s: String): Unit =
             sb.append(hex.charAt(c & 0xf))
           else sb.append(c)
       i += 1
-  sb.append('"')
+  sb.append('"'): Unit
 
 final class JsonOutput(sb: java.lang.StringBuilder) extends OutputAndSimpleOutput:
   def writeNull(): Unit =
-    sb.append("null")
+    sb.append("null"): Unit
 
   def writeBoolean(b: Boolean): Unit =
-    sb.append(b)
+    sb.append(b): Unit
 
   def writeInt(i: Int): Unit =
-    sb.append(i)
+    sb.append(i): Unit
 
   def writeLong(l: Long): Unit =
-    sb.append(l)
+    sb.append(l): Unit
 
   def writeBigInt(b: BigInt): Unit =
-    sb.append(b.toString)
+    sb.append(b.toString): Unit
 
   def writeDouble(d: Double): Unit =
     if java.lang.Double.isFinite(d) then sb.append(numberString(d.toString))
@@ -83,8 +83,8 @@ final class JsonListOutput(sb: java.lang.StringBuilder) extends ListOutput:
     elem
 
   def finish(): Unit =
-    if first then sb.append('[')
-    sb.append(']')
+    if first then sb.append('['): Unit
+    sb.append(']'): Unit
 
 final class JsonObjectOutput(sb: java.lang.StringBuilder) extends ObjectOutput:
   private var first = true
@@ -98,5 +98,5 @@ final class JsonObjectOutput(sb: java.lang.StringBuilder) extends ObjectOutput:
     field
 
   def finish(): Unit =
-    if first then sb.append('{')
-    sb.append('}')
+    if first then sb.append('{'): Unit
+    sb.append('}'): Unit

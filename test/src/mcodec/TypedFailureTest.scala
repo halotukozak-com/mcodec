@@ -13,11 +13,11 @@ class TypedFailureTest extends munit.FunSuite, JsonConv:
 
   test("missing field throws a pattern-matchable MissingField"):
     val rf = intercept[ReadFailure](fromJson[P]("{}"))
-    assert(rf.isInstanceOf[MissingField], s"expected MissingField, got ${rf.getClass}")
+    assert(rf.isInstanceOf[MissingField], s"expected MissingField, got ${rf.getClass.getName}")
 
   test("unknown case throws a pattern-matchable UnknownCase"):
     val rf = intercept[ReadFailure](fromJson[Shape]("""{"Triangle":{}}"""))
-    assert(rf.isInstanceOf[UnknownCase], s"expected UnknownCase, got ${rf.getClass}")
+    assert(rf.isInstanceOf[UnknownCase], s"expected UnknownCase, got ${rf.getClass.getName}")
 
   test("typed failure RETAINS dotted path after prepend"):
     val rf = intercept[ReadFailure](fromJson[User]("""{"address":{"zip":"abc"}}"""))

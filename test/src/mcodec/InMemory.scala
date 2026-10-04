@@ -41,7 +41,7 @@ final class InMemoryObjectOutput(sink: MValue => Unit) extends ObjectOutput:
 
 class InMemoryInput(value: MValue) extends InputAndSimpleInput:
   private def mismatch(expected: String): Nothing =
-    throw ReadFailure(s"expected $expected but got $value")
+    throw ReadFailure(s"expected $expected but got ${value.toString}")
 
   def readNull(): Boolean = value == MNull
   def readString(): String = value match

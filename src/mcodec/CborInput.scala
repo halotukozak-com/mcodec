@@ -23,18 +23,35 @@ final class CborReader(bytes: Array[Byte]):
     if addInfo < 24 then addInfo.toLong
     else if addInfo == 31 then -1L
     else
-      val n = addInfo match
-        case 24 => 1
-        case 25 => 2
-        case 26 => 4
-        case 27 => 8
-        case other => throw ReadFailure(s"invalid additional info: $other")
+      val n = argLength(addInfo)
       var acc = 0L
       var k = 0
       while k < n do
         acc = (acc << 8) | u8().toLong
         k += 1
       acc
+
+  // A definite length read from an argument, rejected rather than narrowed when it doesn't fit an Int.
+  private[mcodec] def readLength(addInfo: Int): Int =
+    val n = readArg(addInfo)
+    if n < 0L || n > Int.MaxValue then throw ReadFailure(s"invalid length: $n")
+    n.toInt
+
+  private[mcodec] def skipArg(addInfo: Int): Unit =
+    if addInfo >= 24 && addInfo != 31 then skip(argLength(addInfo))
+
+  // Bytes following the initial byte that hold the argument, for addInfo 24-27.
+  private def argLength(addInfo: Int): Int = addInfo match
+    case 24 => 1
+    case 25 => 2
+    case 26 => 4
+    case 27 => 8
+    case other => throw ReadFailure(s"invalid additional info: $other")
+
+  private[mcodec] def skip(n: Int): Unit =
+    // compared as `n > bytes.length - pos` so a huge declared length can't overflow past the check
+    if n < 0 || n > bytes.length - pos then throw ReadFailure("unexpected end of input")
+    pos += n
 
   private[mcodec] def readBytes(n: Int): Array[Byte] =
     if pos + n > bytes.length then throw ReadFailure("unexpected end of input")
@@ -50,7 +67,7 @@ class CborInput(reader: CborReader) extends InputAndSimpleInput:
 
   def readNull(): Boolean =
     if reader.peekU8() == 0xf6 then
-      reader.u8()
+      reader.skip(1)
       true
     else false
 
@@ -111,7 +128,7 @@ class CborInput(reader: CborReader) extends InputAndSimpleInput:
       var done = false
       while !done do
         if reader.peekU8() == 0xff then
-          reader.u8()
+          reader.skip(1)
           done = true
         else
           val (cm, ca) = reader.readInitial()
@@ -200,10 +217,10 @@ class CborInput(reader: CborReader) extends InputAndSimpleInput:
   def skip(): Unit =
     val (major, addInfo) = reader.readInitial()
     major match
-      case 0 | 1 => reader.readArg(addInfo)
+      case 0 | 1 => reader.skipArg(addInfo)
       case 2 | 3 =>
         if addInfo == 31 then skipChunks(major)
-        else reader.readBytes(reader.readArg(addInfo).toInt)
+        else reader.skip(reader.readLength(addInfo))
       case 4 =>
         if addInfo == 31 then skipBreakTerminated(1)
         else
@@ -219,13 +236,13 @@ class CborInput(reader: CborReader) extends InputAndSimpleInput:
           while k < n do
             skip(); skip(); k += 1
       case 6 =>
-        reader.readArg(addInfo)
+        reader.skipArg(addInfo) // the tag number
         skip()
       case 7 =>
         addInfo match
-          case 25 => reader.readBytes(2)
-          case 26 => reader.readBytes(4)
-          case 27 => reader.readBytes(8)
+          case 25 => reader.skip(2)
+          case 26 => reader.skip(4)
+          case 27 => reader.skip(8)
           case _ => ()
       case _ => throw ReadFailure(s"cannot skip major type $major")
 
@@ -236,11 +253,11 @@ class CborInput(reader: CborReader) extends InputAndSimpleInput:
     var done = false
     while !done do
       if reader.peekU8() == 0xff then
-        reader.u8()
+        reader.skip(1)
         done = true
       else
         val (_, ca) = reader.readInitial()
-        reader.readBytes(reader.readArg(ca).toInt)
+        reader.skip(reader.readLength(ca))
 
   // Skip an indefinite container's items until the 0xFF break. `perItem` is the
   // number of values per entry (1 for arrays, 2 for maps).
@@ -248,7 +265,7 @@ class CborInput(reader: CborReader) extends InputAndSimpleInput:
     var done = false
     while !done do
       if reader.peekU8() == 0xff then
-        reader.u8()
+        reader.skip(1)
         done = true
       else
         var k = 0
@@ -279,7 +296,7 @@ final class CborListInput(reader: CborReader) extends ListInput:
       ensureHeader()
       if indefinite then
         if reader.peekU8() == 0xff then
-          reader.u8()
+          reader.skip(1)
           ended = true
           false
         else true
@@ -314,7 +331,7 @@ final class CborObjectInput(reader: CborReader) extends ObjectInput:
       ensureHeader()
       if indefinite then
         if reader.peekU8() == 0xff then
-          reader.u8()
+          reader.skip(1)
           ended = true
           false
         else true
