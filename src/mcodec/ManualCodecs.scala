@@ -34,6 +34,8 @@ trait ManualCodecs:
       parent.read(in) match
         case t: T => t
         case other =>
-          throw ReadFailure(s"${other.toString} is not an instance of ${summon[ClassTag[T]].runtimeClass.getName}"),
+          throw ReadFailure(
+            s"${String.valueOf(other)} is not an instance of ${summon[ClassTag[T]].runtimeClass.getName}",
+          ),
     (out, t) => parent.write(out, t),
   )

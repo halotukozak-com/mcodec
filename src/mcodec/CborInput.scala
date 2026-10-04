@@ -31,6 +31,12 @@ final class CborReader(bytes: Array[Byte]):
         k += 1
       acc
 
+  // A definite length read from an argument, rejected rather than narrowed when it doesn't fit an Int.
+  private[mcodec] def readLength(addInfo: Int): Int =
+    val n = readArg(addInfo)
+    if n < 0L || n > Int.MaxValue then throw ReadFailure(s"invalid length: $n")
+    n.toInt
+
   private[mcodec] def skipArg(addInfo: Int): Unit =
     if addInfo >= 24 && addInfo != 31 then skip(argLength(addInfo))
 
@@ -43,7 +49,8 @@ final class CborReader(bytes: Array[Byte]):
     case other => throw ReadFailure(s"invalid additional info: $other")
 
   private[mcodec] def skip(n: Int): Unit =
-    if pos + n > bytes.length then throw ReadFailure("unexpected end of input")
+    // compared as `n > bytes.length - pos` so a huge declared length can't overflow past the check
+    if n < 0 || n > bytes.length - pos then throw ReadFailure("unexpected end of input")
     pos += n
 
   private[mcodec] def readBytes(n: Int): Array[Byte] =
@@ -213,7 +220,7 @@ class CborInput(reader: CborReader) extends InputAndSimpleInput:
       case 0 | 1 => reader.skipArg(addInfo)
       case 2 | 3 =>
         if addInfo == 31 then skipChunks(major)
-        else reader.skip(reader.readArg(addInfo).toInt)
+        else reader.skip(reader.readLength(addInfo))
       case 4 =>
         if addInfo == 31 then skipBreakTerminated(1)
         else
@@ -250,7 +257,7 @@ class CborInput(reader: CborReader) extends InputAndSimpleInput:
         done = true
       else
         val (_, ca) = reader.readInitial()
-        reader.skip(reader.readArg(ca).toInt)
+        reader.skip(reader.readLength(ca))
 
   // Skip an indefinite container's items until the 0xFF break. `perItem` is the
   // number of values per entry (1 for arrays, 2 for maps).

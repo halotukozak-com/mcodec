@@ -16,7 +16,8 @@ final class BsonReader(bytes: Array[Byte]):
     bytes(pos) & 0xff
 
   private[mcodec] def skip(n: Int): Unit =
-    if n < 0 || pos + n > bytes.length then throw ReadFailure("unexpected end of BSON input")
+    // compared as `n > bytes.length - pos` so a huge declared length can't overflow past the check
+    if n < 0 || n > bytes.length - pos then throw ReadFailure("unexpected end of BSON input")
     pos += n
 
   private[mcodec] def readBytesN(n: Int): Array[Byte] =
