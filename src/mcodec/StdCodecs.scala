@@ -75,18 +75,12 @@ trait StdCodecs:
   )
 
   given nullCodec: MCodec[Null] = MCodec.create(
-    in =>
-      in.readNull()
-      null
-    ,
+    in => if in.readNull() then null else throw ReadFailure("expected null"),
     (out, _) => out.writeNull(),
   )
 
   given voidCodec: MCodec[Void | Null] = MCodec.create(
-    in =>
-      in.readNull()
-      null
-    ,
+    in => if in.readNull() then null else throw ReadFailure("expected null for Void"),
     (out, _) => out.writeNull(),
   )
 
