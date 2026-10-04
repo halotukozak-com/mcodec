@@ -15,6 +15,10 @@ final class BsonReader(bytes: Array[Byte]):
     if pos >= bytes.length then throw ReadFailure("unexpected end of BSON input")
     bytes(pos) & 0xff
 
+  private[mcodec] def skip(n: Int): Unit =
+    if n < 0 || pos + n > bytes.length then throw ReadFailure("unexpected end of BSON input")
+    pos += n
+
   private[mcodec] def readBytesN(n: Int): Array[Byte] =
     if n < 0 || pos + n > bytes.length then throw ReadFailure("unexpected end of BSON input")
     val out = new Array[Byte](n)
@@ -44,6 +48,11 @@ final class BsonReader(bytes: Array[Byte]):
     val s = new String(bytes, start, pos - start, "UTF-8")
     pos += 1 // skip NUL
     s
+
+  private[mcodec] def skipCString(): Unit =
+    while pos < bytes.length && bytes(pos) != 0 do pos += 1
+    if pos >= bytes.length then throw ReadFailure("unterminated BSON cstring")
+    pos += 1 // skip NUL
 
   private[mcodec] def readBsonString(): String =
     val len = readInt32LE()
@@ -90,7 +99,7 @@ final class BsonObjectInput(reader: BsonReader) extends ObjectInput:
     ensureHeader()
     if ended then false
     else if reader.peekU8() == 0x00 then
-      reader.u8()
+      reader.skip(1)
       ended = true
       val consumed = reader.position - startPos
       if consumed != declaredLen then
@@ -169,7 +178,7 @@ class BsonValueInput(reader: BsonReader, tag: Int) extends InputAndSimpleInput, 
   override def readBinary(): Array[Byte] =
     if tag != 0x05 then mismatch("binary")
     val len = reader.readInt32LE()
-    reader.u8() // subtype, ignored
+    reader.skip(1) // subtype, ignored
     reader.readBytesN(len)
 
   override def readTimestamp(): Long =
@@ -206,19 +215,19 @@ class BsonValueInput(reader: BsonReader, tag: Int) extends InputAndSimpleInput, 
 
 object BsonValueInput:
   private[mcodec] def skipPayload(reader: BsonReader, tag: Int): Unit = tag match
-    case 0x01 => reader.readBytesN(8) // double
-    case 0x02 => val len = reader.readInt32LE(); reader.readBytesN(len) // string, NUL included in len
+    case 0x01 => reader.skip(8) // double
+    case 0x02 => reader.skip(reader.readInt32LE()) // string, NUL included in len
     case 0x03 => new BsonObjectInput(reader).skipRemaining()
     case 0x04 => new BsonListInput(reader).skipRemaining()
-    case 0x05 => val len = reader.readInt32LE(); reader.u8(); reader.readBytesN(len)
-    case 0x07 => reader.readBytesN(12)
-    case 0x08 => reader.u8()
-    case 0x09 => reader.readBytesN(8)
+    case 0x05 => val len = reader.readInt32LE(); reader.skip(1); reader.skip(len) // binary: subtype byte, data
+    case 0x07 => reader.skip(12)
+    case 0x08 => reader.skip(1)
+    case 0x09 => reader.skip(8)
     case 0x0a => ()
-    case 0x0b => reader.readCString(); reader.readCString()
-    case 0x0d => val len = reader.readInt32LE(); reader.readBytesN(len)
-    case 0x10 => reader.readBytesN(4)
-    case 0x12 => reader.readBytesN(8)
+    case 0x0b => reader.skipCString(); reader.skipCString()
+    case 0x0d => reader.skip(reader.readInt32LE())
+    case 0x10 => reader.skip(4)
+    case 0x12 => reader.skip(8)
     case 0x7f | 0xff => ()
     case other => throw ReadFailure(f"cannot skip unknown BSON type tag 0x$other%02x")
 
