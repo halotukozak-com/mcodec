@@ -46,7 +46,7 @@ object `package` extends Module:
         "-Werror",
         // -Ycheck:all can't be enabled once Scoverage instruments the trees (same
         // limitation regex/alpaca hit); -Ycheck:macros above stays.
-        "-Wconf:msg=Skipping coverage instrumentation.*:s",
+        "-Wconf:msg=Skipping coverage instrumentation.*:i",
         // Dotty misreports the position of Product methods (canEqual, productArity, ...) as
         // 0 for locally-scoped case classes under -Xcheck-macros -- a compiler-internal
         // diagnostic bug, not a real code issue.
