@@ -1,6 +1,6 @@
 package halotukozak.mcodec
 
-class NullableTest extends munit.FunSuite, JsonConv:
+class NullableTest extends munit.FunSuite, JsonConv, UnionSafeCompare:
   given MCodec[String | Null] = MCodec[String].nullable
 
   test("nullable writes explicit wire-null for null"):
@@ -10,7 +10,7 @@ class NullableTest extends munit.FunSuite, JsonConv:
     assertEquals("x".toJson[String | Null], "\"x\"")
 
   test("nullable reads wire-null as null"):
-    assertEquals[Any, Any](fromJson[String | Null]("null"), null)
+    assertEquals(fromJson[String | Null]("null"), null)
 
   test("nullable delegates read for non-null"):
-    assertEquals[Any, Any](fromJson[String | Null]("\"x\""), "x")
+    assertEquals(fromJson[String | Null]("\"x\""), "x")
