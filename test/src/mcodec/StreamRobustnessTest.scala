@@ -46,9 +46,9 @@ class StreamRobustnessTest extends munit.FunSuite, JsonConv, CborConv, BsonConv:
   // Skipping an unknown field must not move the cursor past a length it hasn't validated.
   test("BSON unknown field with an overflowing declared length -> ReadFailure"):
     // { z: <string of declared length 0x7FFFFFFF> }: pos + length overflows an Int
-    intercept[ReadFailure](fromBsonHex[Point]("0B000000027A00FFFFFF7F")): Unit
+    intercept[ReadFailure](fromBsonHex[Point]("0B000000027A00FFFFFF7F"))
 
   test("CBOR unknown field with a length beyond Int.MaxValue -> ReadFailure"):
     // { "z": <byte string of declared length 2^32 + 1>, "x": 1, "y": 2 }: narrowed to an Int the length is 1,
     // which would skip one byte and then decode the rest as if the input were well-formed
-    intercept[ReadFailure](fromCborHex[Point]("A3617A5B000000010000000100617801617902")): Unit
+    intercept[ReadFailure](fromCborHex[Point]("A3617A5B000000010000000100617801617902"))
