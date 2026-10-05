@@ -102,7 +102,7 @@ final class JsonReader(s: String):
     if s.charAt(j) == '"' then
       i = j + 1
       return s.substring(start, j)
-    val b = new java.lang.StringBuilder(s.length - start)
+    val b = new StringBuilder(s.length - start)
     b.append(s, start, j)
     i = j
     var done = false
@@ -131,8 +131,8 @@ final class JsonReader(s: String):
               i += 4
               Integer.parseInt(hex, 16).toChar
             case other => throw ReadFailure(s"invalid escape: \\$other" + posSuffix(i))
-          b.append(unescaped): Unit
-        case other => b.append(other): Unit
+          b.append(unescaped)
+        case other => b.append(other)
     b.toString
 
   def readNull(): Boolean =

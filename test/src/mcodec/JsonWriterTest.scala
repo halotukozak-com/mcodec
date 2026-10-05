@@ -3,7 +3,7 @@ package halotukozak.mcodec
 class JsonWriterTest extends munit.FunSuite:
 
   private def emit(f: JsonOutput => Unit): String =
-    val sb = new java.lang.StringBuilder
+    val sb = new StringBuilder
     f(new JsonOutput(sb))
     sb.toString
 
