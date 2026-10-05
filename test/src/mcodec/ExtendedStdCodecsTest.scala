@@ -6,7 +6,7 @@ import org.scalacheck.Arbitrary
 import java.lang as jl
 import java.util as ju
 
-class ExtendedStdCodecsTest extends RoundTrip(InMemoryBackend), JsonConv:
+class ExtendedStdCodecsTest extends RoundTrip(InMemoryBackend), JsonConv, UnionSafeCompare:
 
   private def emit[T: MCodec as c](value: T): MValue =
     val (out, harvest) = InMemoryBackend.output()
@@ -86,44 +86,44 @@ class ExtendedStdCodecsTest extends RoundTrip(InMemoryBackend), JsonConv:
 
   // ===== Java boxed types (all 10) =====
   test("boxed types round-trip via emit/read (value equality)"):
-    assertEquals[Any, Any](
+    assertEquals(
       MCodec[jl.Boolean | Null].read(InMemoryBackend.input(emit[jl.Boolean | Null](jl.Boolean.valueOf(true)))),
       jl.Boolean.valueOf(true),
     )
-    assertEquals[Any, Any](
+    assertEquals(
       MCodec[jl.Character | Null].read(InMemoryBackend.input(emit[jl.Character | Null](jl.Character.valueOf('a')))),
       jl.Character.valueOf('a'),
     )
-    assertEquals[Any, Any](
+    assertEquals(
       MCodec[jl.Byte | Null].read(InMemoryBackend.input(emit[jl.Byte | Null](jl.Byte.valueOf(3.toByte)))),
       jl.Byte.valueOf(3.toByte),
     )
-    assertEquals[Any, Any](
+    assertEquals(
       MCodec[jl.Short | Null].read(InMemoryBackend.input(emit[jl.Short | Null](jl.Short.valueOf(4.toShort)))),
       jl.Short.valueOf(4.toShort),
     )
-    assertEquals[Any, Any](
+    assertEquals(
       MCodec[jl.Integer | Null].read(InMemoryBackend.input(emit[jl.Integer | Null](jl.Integer.valueOf(7)))),
       jl.Integer.valueOf(7),
     )
-    assertEquals[Any, Any](
+    assertEquals(
       MCodec[jl.Long | Null].read(InMemoryBackend.input(emit[jl.Long | Null](jl.Long.valueOf(8L)))),
       jl.Long.valueOf(8L),
     )
-    assertEquals[Any, Any](
+    assertEquals(
       MCodec[jl.Float | Null].read(InMemoryBackend.input(emit[jl.Float | Null](jl.Float.valueOf(1.5f)))),
       jl.Float.valueOf(1.5f),
     )
-    assertEquals[Any, Any](
+    assertEquals(
       MCodec[jl.Double | Null].read(InMemoryBackend.input(emit[jl.Double | Null](jl.Double.valueOf(2.5)))),
       jl.Double.valueOf(2.5),
     )
-    assertEquals[Any, Any](
+    assertEquals(
       MCodec[java.math.BigInteger | Null]
         .read(InMemoryBackend.input(emit[java.math.BigInteger | Null](java.math.BigInteger.valueOf(9L)))),
       java.math.BigInteger.valueOf(9L),
     )
-    assertEquals[Any, Any](
+    assertEquals(
       MCodec[java.math.BigDecimal | Null]
         .read(InMemoryBackend.input(emit[java.math.BigDecimal | Null](java.math.BigDecimal.valueOf(1.25)))),
       java.math.BigDecimal.valueOf(1.25),
@@ -133,7 +133,7 @@ class ExtendedStdCodecsTest extends RoundTrip(InMemoryBackend), JsonConv:
     assertEquals(emit[jl.Integer | Null](jl.Integer.valueOf(7)), MInt(7))
 
   test("boxed types are nullable (wire-null <-> JVM null)"):
-    assertEquals[Any, Any](MCodec[jl.Integer | Null].read(InMemoryBackend.input(MNull)), null)
+    assertEquals(MCodec[jl.Integer | Null].read(InMemoryBackend.input(MNull)), null)
     assertEquals(emit[jl.Integer | Null](null), MNull)
 
   // ===== Java collections / maps via JFactory =====
