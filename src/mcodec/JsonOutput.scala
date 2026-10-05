@@ -7,9 +7,17 @@ import scala.annotation.switch
 private def numberString(s: String): String =
   if s.contains('.') || s.contains('e') || s.contains('E') then s else s + ".0"
 
+// java.lang.StringBuilder#append(CharSequence, Int, Int) has no counterpart on the Scala builder. A given
+// rather than a top-level extension, so that calls count as returning the receiver and need no `: Unit`
+private[mcodec] given StringBuilderOps: AnyRef with
+  extension (sb: StringBuilder)
+    def append(s: CharSequence, start: Int, end: Int): sb.type =
+      sb.underlying.append(s, start, end)
+      sb
+
 inline private def needsEscape(c: Char): Boolean = c < 0x20 || c == '"' || c == '\\'
 
-private def writeJsonString(sb: java.lang.StringBuilder, s: String): Unit =
+private def writeJsonString(sb: StringBuilder, s: String): Unit =
   sb.append('"')
   val n = s.length
   var i = 0
@@ -35,37 +43,40 @@ private def writeJsonString(sb: java.lang.StringBuilder, s: String): Unit =
             sb.append(hex.charAt(c & 0xf))
           else sb.append(c)
       i += 1
-  sb.append('"'): Unit
+  sb.append('"')
 
-final class JsonOutput(sb: java.lang.StringBuilder) extends OutputAndSimpleOutput:
+final class JsonOutput(sb: StringBuilder) extends OutputAndSimpleOutput:
   def writeNull(): Unit =
-    sb.append("null"): Unit
+    sb.append("null")
 
   def writeBoolean(b: Boolean): Unit =
-    sb.append(b): Unit
+    sb.append(b)
 
   def writeInt(i: Int): Unit =
-    sb.append(i): Unit
+    sb.append(i)
 
   def writeLong(l: Long): Unit =
-    sb.append(l): Unit
+    sb.append(l)
 
   def writeBigInt(b: BigInt): Unit =
-    sb.append(b.toString): Unit
+    sb.append(b.toString)
 
   def writeDouble(d: Double): Unit =
     if java.lang.Double.isFinite(d) then sb.append(numberString(d.toString))
-    else sb.append('"').append(d.toString).append('"')
-    ()
+    else
+      sb.append('"')
+      sb.append(d.toString)
+      sb.append('"')
 
   override def writeFloat(f: Float): Unit =
     if java.lang.Float.isFinite(f) then sb.append(numberString(f.toString))
-    else sb.append('"').append(f.toString).append('"')
-    ()
+    else
+      sb.append('"')
+      sb.append(f.toString)
+      sb.append('"')
 
   def writeBigDecimal(b: BigDecimal): Unit =
     sb.append(b.toString)
-    ()
 
   def writeString(s: String): Unit = writeJsonString(sb, s)
 
@@ -73,7 +84,7 @@ final class JsonOutput(sb: java.lang.StringBuilder) extends OutputAndSimpleOutpu
 
   def writeObject(): ObjectOutput = new JsonObjectOutput(sb)
 
-final class JsonListOutput(sb: java.lang.StringBuilder) extends ListOutput:
+final class JsonListOutput(sb: StringBuilder) extends ListOutput:
   private var first = true
   private val elem = new JsonOutput(sb)
 
@@ -83,10 +94,10 @@ final class JsonListOutput(sb: java.lang.StringBuilder) extends ListOutput:
     elem
 
   def finish(): Unit =
-    if first then sb.append('['): Unit
-    sb.append(']'): Unit
+    if first then sb.append('[')
+    sb.append(']')
 
-final class JsonObjectOutput(sb: java.lang.StringBuilder) extends ObjectOutput:
+final class JsonObjectOutput(sb: StringBuilder) extends ObjectOutput:
   private var first = true
   private val field = new JsonOutput(sb)
 
@@ -98,5 +109,5 @@ final class JsonObjectOutput(sb: java.lang.StringBuilder) extends ObjectOutput:
     field
 
   def finish(): Unit =
-    if first then sb.append('{'): Unit
-    sb.append('}'): Unit
+    if first then sb.append('{')
+    sb.append('}')

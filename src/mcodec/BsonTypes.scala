@@ -3,7 +3,7 @@ package halotukozak.mcodec
 /** A 12-byte MongoDB ObjectId. BSON-native (type 0x07); falls back to a 24-char hex string elsewhere. */
 final class ObjectId private (val bytes: Array[Byte]) extends AnyVal:
   def toHexString: String =
-    val sb = new java.lang.StringBuilder
+    val sb = new StringBuilder
     bytes.foreach(b => sb.append("%02x".format(b & 0xff)))
     sb.toString
   override def equals(o: Any): Boolean = o match
