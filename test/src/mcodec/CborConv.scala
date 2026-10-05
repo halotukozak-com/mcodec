@@ -12,7 +12,7 @@ object Bytes:
 
 trait CborConv:
   private def hex(bytes: Array[Byte]): String =
-    val sb = new java.lang.StringBuilder
+    val sb = new StringBuilder
     var i = 0
     while i < bytes.length do
       sb.append("%02X".format(bytes(i) & 0xff))

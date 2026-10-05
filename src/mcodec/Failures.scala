@@ -8,15 +8,15 @@ enum PathSegment:
 
 object PathSegment:
   def render(path: List[PathSegment]): String =
-    val sb = new java.lang.StringBuilder
+    val sb = new StringBuilder
     var first = true
     path.foreach:
       case Field(n) =>
-        if !first then sb.append('.'): Unit
+        if !first then sb.append('.')
         sb.append(n)
         first = false
       case Case(n) =>
-        if !first then sb.append('.'): Unit
+        if !first then sb.append('.')
         sb.append(n)
         first = false
       case Index(i) => sb.append('[').append(i).append(']'): Unit
