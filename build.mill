@@ -143,7 +143,7 @@ object `package` extends Module:
     override def scalacOptions = Seq("-deprecation", "-feature", "-new-syntax", "-Wconf:any:silent", "-Yexplicit-nulls")
 
     override def mvnDeps = super.mvnDeps() ++ Seq(
-      mvn"io.circe::circe-core::0.14.16",
+      mvn"io.circe::circe-core::0.14.17",
       mvn"io.circe::circe-parser::0.14.16",
       mvn"io.circe::circe-generic::0.14.16",
       mvn"com.github.plokhotnyuk.jsoniter-scala::jsoniter-scala-core::2.41.2",
