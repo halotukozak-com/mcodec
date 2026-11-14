@@ -118,3 +118,7 @@ Guides and API reference: **[mcodec.halotukozak.com](https://mcodec.halotukozak.
 
 mcodec is inspired by the [**AVSystem commons**](https://github.com/AVSystem/scala-commons) by [**ghik
 **](https://github.com/ghik), whose `GenCodec` is the model for the codec design
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
