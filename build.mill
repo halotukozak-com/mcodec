@@ -92,7 +92,7 @@ object `package` extends Module:
       description = "mcodec - GenCodec-style serialization for Scala 3, built on Made",
       organization = "com.halotukozak",
       url = "https://github.com/halotukozak-com/mcodec",
-      licenses = Seq(License.ApacheVersion2),
+      licenses = Seq(License.`Apache-2.0`),
       versionControl = VersionControl.github("halotukozak-com", "mcodec"),
       developers = Seq(Developer("halotukozak", "Bartłomiej Kozak", "https://github.com/halotukozak")),
     )
