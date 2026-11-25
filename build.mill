@@ -117,7 +117,7 @@ object `package` extends Module:
     object test extends ScalaJSTests with MunitTests
 
   object native extends Shared with ScalaNativeModule:
-    def scalaNativeVersion = "0.5.12"
+    def scalaNativeVersion = "0.5.13"
 
     object test extends ScalaNativeTests with MunitTests:
       // Crashes the Scala Native runtime (javalib limitation, not a bug under test) —
